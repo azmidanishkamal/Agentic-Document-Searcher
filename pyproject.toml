@@ -1,0 +1,25 @@
+[project]
+name = "agentic-document-searcher"
+version = "0.1.0"
+description = "Agentic RAG system benchmarking Pinecone vs. Weaviate for retrieval quality, with an evaluation harness."
+readme = "README"
+requires-python = ">=3.11"
+dependencies = [
+    "langgraph",
+    "langchain",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
