@@ -54,3 +54,11 @@ class PineconeStore:
         for start in range(0, len(vectors), _UPSERT_BATCH_SIZE):
             batch = vectors[start : start + _UPSERT_BATCH_SIZE]
             self._index.upsert(vectors=batch)
+
+    def close(self) -> None:
+        # Index clients hold their own connection pool separate from the
+        # control-plane client, so both need closing to avoid unclosed
+        # SSL sockets.
+        if self._index is not None:
+            self._index.close()
+        self.client.close()

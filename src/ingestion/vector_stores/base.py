@@ -16,3 +16,7 @@ class VectorStore(Protocol):
     def upsert_chunks(self, chunks: list[Chunk]) -> None:
         """Write embedded chunks (with metadata) into the store."""
         ...
+
+    def close(self) -> None:
+        """Release the underlying client connection."""
+        ...

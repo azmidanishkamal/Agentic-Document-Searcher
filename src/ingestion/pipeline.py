@@ -82,44 +82,51 @@ def run_ingestion(
     summary = IngestionSummary()
     embedder = None if dry_run else OpenAIEmbedder(embedding_config)
 
-    if not dry_run:
-        for store in stores or []:
-            store.ensure_index()
-
-    for company in companies:
-        filings = edgar_client.find_company_filings(company, years_back)
-        logger.info("%s: found %d filing(s)", company.ticker, len(filings))
-
-        for filing in filings:
-            chunks = _build_chunks(filing, company, chunking_config)
-            summary.filings_processed += 1
-            summary.chunks_created += len(chunks)
-            logger.info(
-                "%s FY%d %s: %d chunks", company.ticker, filing.fiscal_year, filing.form_type, len(chunks)
-            )
-
-            if dry_run:
-                continue
-
-            texts = [chunk.text for chunk in chunks]
-            embeddings = embedder.embed_batch(texts)
-            embedded_chunks = [
-                Chunk(
-                    chunk_id=chunk.chunk_id,
-                    text=chunk.text,
-                    chunk_index=chunk.chunk_index,
-                    total_chunks=chunk.total_chunks,
-                    filing=chunk.filing,
-                    embedding=embedding,
-                )
-                for chunk, embedding in zip(chunks, embeddings, strict=True)
-            ]
-
+    try:
+        if not dry_run:
             for store in stores or []:
-                store.upsert_chunks(embedded_chunks)
-                summary.chunks_upserted += len(embedded_chunks)
+                store.ensure_index()
 
-    return summary
+        for company in companies:
+            filings = edgar_client.find_company_filings(company, years_back)
+            logger.info("%s: found %d filing(s)", company.ticker, len(filings))
+
+            for filing in filings:
+                chunks = _build_chunks(filing, company, chunking_config)
+                summary.filings_processed += 1
+                summary.chunks_created += len(chunks)
+                logger.info(
+                    "%s FY%d %s: %d chunks", company.ticker, filing.fiscal_year, filing.form_type, len(chunks)
+                )
+
+                if dry_run:
+                    continue
+
+                texts = [chunk.text for chunk in chunks]
+                embeddings = embedder.embed_batch(texts)
+                embedded_chunks = [
+                    Chunk(
+                        chunk_id=chunk.chunk_id,
+                        text=chunk.text,
+                        chunk_index=chunk.chunk_index,
+                        total_chunks=chunk.total_chunks,
+                        filing=chunk.filing,
+                        embedding=embedding,
+                    )
+                    for chunk, embedding in zip(chunks, embeddings, strict=True)
+                ]
+
+                for store in stores or []:
+                    store.upsert_chunks(embedded_chunks)
+                    summary.chunks_upserted += len(embedded_chunks)
+
+        return summary
+    finally:
+        for store in stores or []:
+            try:
+                store.close()
+            except Exception:
+                logger.warning("Failed to close vector store %s", type(store).__name__, exc_info=True)
 
 
 def default_stores() -> list[VectorStore]:
