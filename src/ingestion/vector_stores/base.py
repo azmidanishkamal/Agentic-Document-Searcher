@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import Protocol
 
 from src.ingestion.models import Chunk
+from src.retrieval.results import RetrievalResult
 
 
 class VectorStore(Protocol):
@@ -15,6 +16,10 @@ class VectorStore(Protocol):
 
     def upsert_chunks(self, chunks: list[Chunk]) -> None:
         """Write embedded chunks (with metadata) into the store."""
+        ...
+
+    def query(self, query_text: str, top_k: int = 5) -> list[RetrievalResult]:
+        """Embed `query_text` and return the `top_k` nearest chunks, most similar first."""
         ...
 
     def close(self) -> None:

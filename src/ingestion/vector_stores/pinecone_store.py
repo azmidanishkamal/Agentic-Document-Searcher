@@ -7,8 +7,11 @@ import time
 
 from pinecone import Pinecone, ServerlessSpec
 
-from src.ingestion.config import IndexConfig, PineconeConfig
+from src.ingestion.config import EmbeddingConfig, IndexConfig, PineconeConfig
+from src.ingestion.embeddings import OpenAIEmbedder
 from src.ingestion.models import Chunk
+from src.retrieval.embedding import embed_query
+from src.retrieval.results import RetrievalResult, result_from_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -21,11 +24,15 @@ class PineconeStore:
         index_config: IndexConfig,
         pinecone_config: PineconeConfig,
         client: Pinecone | None = None,
+        embedder: OpenAIEmbedder | None = None,
     ) -> None:
         self.index_config = index_config
         self.pinecone_config = pinecone_config
         self.client = client or Pinecone()
         self._index = None
+        # Lazy default so constructing a store never requires an OpenAI API
+        # key unless `query` is actually called.
+        self.embedder = embedder
 
     def ensure_index(self) -> None:
         existing = {index.name for index in self.client.list_indexes()}
@@ -54,6 +61,19 @@ class PineconeStore:
         for start in range(0, len(vectors), _UPSERT_BATCH_SIZE):
             batch = vectors[start : start + _UPSERT_BATCH_SIZE]
             self._index.upsert(vectors=batch)
+
+    def query(self, query_text: str, top_k: int = 5) -> list[RetrievalResult]:
+        if self._index is None:
+            self.ensure_index()
+        if self.embedder is None:
+            self.embedder = OpenAIEmbedder(EmbeddingConfig())
+
+        vector = embed_query(self.embedder, query_text)
+        response = self._index.query(vector=vector, top_k=top_k, include_metadata=True)
+        return [
+            result_from_metadata(id_=match.id, score=match.score, metadata=match.metadata)
+            for match in response.matches
+        ]
 
     def close(self) -> None:
         # Index clients hold their own connection pool separate from the

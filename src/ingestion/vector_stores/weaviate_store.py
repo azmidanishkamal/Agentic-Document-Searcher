@@ -14,11 +14,15 @@ import os
 
 import weaviate
 import weaviate.classes.config as wvc
+import weaviate.classes.query as wvc_query
 from weaviate.classes.init import Auth
 from weaviate.util import generate_uuid5
 
-from src.ingestion.config import IndexConfig, WeaviateConfig
+from src.ingestion.config import EmbeddingConfig, IndexConfig, WeaviateConfig
+from src.ingestion.embeddings import OpenAIEmbedder
 from src.ingestion.models import Chunk
+from src.retrieval.embedding import embed_query
+from src.retrieval.results import RetrievalResult, result_from_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +35,7 @@ class WeaviateStore:
         index_config: IndexConfig,
         weaviate_config: WeaviateConfig,
         client: weaviate.WeaviateClient | None = None,
+        embedder: OpenAIEmbedder | None = None,
     ) -> None:
         self.index_config = index_config
         self.weaviate_config = weaviate_config
@@ -38,6 +43,9 @@ class WeaviateStore:
             cluster_url=os.environ["WEAVIATE_URL"],
             auth_credentials=Auth.api_key(os.environ["WEAVIATE_API_KEY"]),
         )
+        # Lazy default so constructing a store never requires an OpenAI API
+        # key unless `query` is actually called.
+        self.embedder = embedder
 
     def ensure_index(self) -> None:
         name = self.weaviate_config.collection_name
@@ -75,6 +83,26 @@ class WeaviateStore:
                     vector=chunk.embedding,
                     uuid=generate_uuid5(chunk.chunk_id),
                 )
+
+    def query(self, query_text: str, top_k: int = 5) -> list[RetrievalResult]:
+        if self.embedder is None:
+            self.embedder = OpenAIEmbedder(EmbeddingConfig())
+
+        vector = embed_query(self.embedder, query_text)
+        collection = self.client.collections.get(self.weaviate_config.collection_name)
+        response = collection.query.near_vector(
+            near_vector=vector,
+            limit=top_k,
+            return_metadata=wvc_query.MetadataQuery(distance=True),
+        )
+        return [
+            # Collection distance is cosine distance (1 - cosine similarity),
+            # so flip it to a similarity score comparable with Pinecone's.
+            result_from_metadata(
+                id_=str(obj.uuid), score=1.0 - obj.metadata.distance, metadata=obj.properties
+            )
+            for obj in response.objects
+        ]
 
     def close(self) -> None:
         self.client.close()
