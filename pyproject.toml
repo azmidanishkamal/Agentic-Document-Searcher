@@ -16,6 +16,7 @@ dependencies = [
     "pinecone",
     "weaviate-client",
     "python-dotenv",
+    "rank-bm25",
 ]
 
 [project.optional-dependencies]

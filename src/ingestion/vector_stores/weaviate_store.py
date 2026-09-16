@@ -22,6 +22,7 @@ from src.ingestion.config import EmbeddingConfig, IndexConfig, WeaviateConfig
 from src.ingestion.embeddings import OpenAIEmbedder
 from src.ingestion.models import Chunk
 from src.retrieval.embedding import embed_query
+from src.retrieval.fusion import default_candidate_pool_size, reciprocal_rank_fusion
 from src.retrieval.results import RetrievalResult, result_from_metadata
 
 logger = logging.getLogger(__name__)
@@ -103,6 +104,24 @@ class WeaviateStore:
             )
             for obj in response.objects
         ]
+
+    def query_hybrid(self, query_text: str, top_k: int = 5) -> list[RetrievalResult]:
+        pool = default_candidate_pool_size(top_k)
+        dense_results = self.query(query_text, top_k=pool)
+
+        collection = self.client.collections.get(self.weaviate_config.collection_name)
+        bm25_response = collection.query.bm25(
+            query=query_text,
+            query_properties=["text"],
+            limit=pool,
+            return_metadata=wvc_query.MetadataQuery(score=True),
+        )
+        sparse_results = [
+            result_from_metadata(id_=str(obj.uuid), score=obj.metadata.score, metadata=obj.properties)
+            for obj in bm25_response.objects
+        ]
+
+        return reciprocal_rank_fusion([dense_results, sparse_results], top_k=top_k)
 
     def close(self) -> None:
         self.client.close()

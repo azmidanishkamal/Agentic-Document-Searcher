@@ -22,6 +22,12 @@ class VectorStore(Protocol):
         """Embed `query_text` and return the `top_k` nearest chunks, most similar first."""
         ...
 
+    def query_hybrid(self, query_text: str, top_k: int = 5) -> list[RetrievalResult]:
+        """Dense + sparse retrieval, fused via Reciprocal Rank Fusion. The sparse
+        leg is backend-native (BM25 for Weaviate, a local keyword pass for
+        Pinecone); the fusion step is identical across backends."""
+        ...
+
     def close(self) -> None:
         """Release the underlying client connection."""
         ...

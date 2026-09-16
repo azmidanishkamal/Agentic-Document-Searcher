@@ -74,3 +74,82 @@ def test_query_defaults_top_k_to_five() -> None:
     store.query("anything")
 
     assert fake_index.query.call_args.kwargs["top_k"] == 5
+
+
+_DENSE_ONLY_METADATA = {
+    **_METADATA,
+    "text": "Revenue increased due to higher electricity demand.",
+}
+_KEYWORD_ONLY_METADATA = {
+    **_METADATA,
+    "text": "Mine suspension in Niger disrupted uranium supply in 2024.",
+}
+# BM25's idf collapses to ~0 when a query term appears in half or more of a
+# tiny corpus, so give the local BM25 index a third, unrelated filler
+# document -- otherwise "chunk_keyword" would score 0 like everything else.
+_FILLER_METADATA = {
+    **_METADATA,
+    "text": "The company recorded a net loss for the fiscal year.",
+}
+
+
+def test_query_hybrid_fuses_dense_and_keyword_legs() -> None:
+    dense_match = SimpleNamespace(id="chunk_dense", score=0.9, metadata=_DENSE_ONLY_METADATA)
+    fake_index = MagicMock()
+    fake_index.query.return_value = SimpleNamespace(matches=[dense_match])
+    fake_index.list.return_value = iter(
+        [
+            SimpleNamespace(
+                vectors=[
+                    SimpleNamespace(id="chunk_dense"),
+                    SimpleNamespace(id="chunk_keyword"),
+                    SimpleNamespace(id="chunk_filler"),
+                ]
+            )
+        ]
+    )
+    fake_index.fetch.return_value = SimpleNamespace(
+        vectors={
+            "chunk_dense": SimpleNamespace(metadata=_DENSE_ONLY_METADATA),
+            "chunk_keyword": SimpleNamespace(metadata=_KEYWORD_ONLY_METADATA),
+            "chunk_filler": SimpleNamespace(metadata=_FILLER_METADATA),
+        }
+    )
+
+    store = PineconeStore(
+        index_config=IndexConfig(),
+        pinecone_config=PineconeConfig(),
+        client=MagicMock(),
+        embedder=FakeEmbedder([0.1, 0.2, 0.3]),
+    )
+    store._index = fake_index
+
+    results = store.query_hybrid("mine suspension in Niger", top_k=2)
+
+    assert {r.id for r in results} == {"chunk_dense", "chunk_keyword"}
+    # "chunk_keyword" only surfaces through the local BM25 leg (list+fetch),
+    # not the dense leg -- confirms the sparse path actually contributes.
+    fake_index.fetch.assert_called_once_with(ids=["chunk_dense", "chunk_keyword", "chunk_filler"])
+
+
+def test_query_hybrid_caches_the_bm25_index_across_calls() -> None:
+    fake_index = MagicMock()
+    fake_index.query.return_value = SimpleNamespace(matches=[])
+    fake_index.list.return_value = iter(
+        [SimpleNamespace(vectors=[SimpleNamespace(id="chunk_dense")])]
+    )
+    fake_index.fetch.return_value = SimpleNamespace(
+        vectors={"chunk_dense": SimpleNamespace(metadata=_DENSE_ONLY_METADATA)}
+    )
+    store = PineconeStore(
+        index_config=IndexConfig(),
+        pinecone_config=PineconeConfig(),
+        client=MagicMock(),
+        embedder=FakeEmbedder([0.0]),
+    )
+    store._index = fake_index
+
+    store.query_hybrid("anything", top_k=2)
+    store.query_hybrid("anything else", top_k=2)
+
+    fake_index.list.assert_called_once()

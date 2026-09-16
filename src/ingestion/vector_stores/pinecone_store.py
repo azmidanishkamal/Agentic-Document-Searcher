@@ -11,6 +11,8 @@ from src.ingestion.config import EmbeddingConfig, IndexConfig, PineconeConfig
 from src.ingestion.embeddings import OpenAIEmbedder
 from src.ingestion.models import Chunk
 from src.retrieval.embedding import embed_query
+from src.retrieval.fusion import default_candidate_pool_size, reciprocal_rank_fusion
+from src.retrieval.keyword_search import BM25Index
 from src.retrieval.results import RetrievalResult, result_from_metadata
 
 logger = logging.getLogger(__name__)
@@ -33,6 +35,9 @@ class PineconeStore:
         # Lazy default so constructing a store never requires an OpenAI API
         # key unless `query` is actually called.
         self.embedder = embedder
+        # Pinecone has no native full-text search; built lazily by scanning
+        # the index once, then cached for reuse across `query_hybrid` calls.
+        self._bm25_index: BM25Index | None = None
 
     def ensure_index(self) -> None:
         existing = {index.name for index in self.client.list_indexes()}
@@ -74,6 +79,24 @@ class PineconeStore:
             result_from_metadata(id_=match.id, score=match.score, metadata=match.metadata)
             for match in response.matches
         ]
+
+    def _keyword_index(self) -> BM25Index:
+        if self._bm25_index is None:
+            if self._index is None:
+                self.ensure_index()
+            documents: list[tuple[str, dict]] = []
+            for page in self._index.list():
+                ids = [item.id for item in page.vectors]
+                fetched = self._index.fetch(ids=ids)
+                documents.extend((id_, vector.metadata) for id_, vector in fetched.vectors.items())
+            self._bm25_index = BM25Index.from_metadata(documents)
+        return self._bm25_index
+
+    def query_hybrid(self, query_text: str, top_k: int = 5) -> list[RetrievalResult]:
+        pool = default_candidate_pool_size(top_k)
+        dense_results = self.query(query_text, top_k=pool)
+        sparse_results = self._keyword_index().search(query_text, top_k=pool)
+        return reciprocal_rank_fusion([dense_results, sparse_results], top_k=top_k)
 
     def close(self) -> None:
         # Index clients hold their own connection pool separate from the

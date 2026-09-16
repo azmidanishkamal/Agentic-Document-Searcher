@@ -84,3 +84,58 @@ def test_query_defaults_top_k_to_five() -> None:
     store.query("anything")
 
     assert fake_collection.query.near_vector.call_args.kwargs["limit"] == 5
+
+
+_DENSE_ONLY_METADATA = {**_METADATA, "text": "Revenue increased due to higher electricity demand."}
+_KEYWORD_ONLY_METADATA = {
+    **_METADATA,
+    "text": "Mine suspension in Niger disrupted uranium supply in 2024.",
+}
+
+
+def test_query_hybrid_fuses_dense_and_bm25_legs() -> None:
+    dense_obj = SimpleNamespace(
+        uuid="dense-uuid", properties=_DENSE_ONLY_METADATA, metadata=SimpleNamespace(distance=0.1)
+    )
+    bm25_obj = SimpleNamespace(
+        uuid="keyword-uuid", properties=_KEYWORD_ONLY_METADATA, metadata=SimpleNamespace(score=5.0)
+    )
+    fake_collection = MagicMock()
+    fake_collection.query.near_vector.return_value = SimpleNamespace(objects=[dense_obj])
+    fake_collection.query.bm25.return_value = SimpleNamespace(objects=[bm25_obj])
+    fake_client = MagicMock()
+    fake_client.collections.get.return_value = fake_collection
+
+    store = WeaviateStore(
+        index_config=IndexConfig(),
+        weaviate_config=WeaviateConfig(),
+        client=fake_client,
+        embedder=FakeEmbedder([0.4, 0.5]),
+    )
+
+    results = store.query_hybrid("mine suspension in Niger", top_k=2)
+
+    assert {r.id for r in results} == {"dense-uuid", "keyword-uuid"}
+    _, bm25_kwargs = fake_collection.query.bm25.call_args
+    assert bm25_kwargs["query"] == "mine suspension in Niger"
+    assert bm25_kwargs["query_properties"] == ["text"]
+    assert bm25_kwargs["limit"] == 20  # default_candidate_pool_size(2)
+
+
+def test_query_hybrid_defaults_top_k_to_five() -> None:
+    fake_collection = MagicMock()
+    fake_collection.query.near_vector.return_value = SimpleNamespace(objects=[])
+    fake_collection.query.bm25.return_value = SimpleNamespace(objects=[])
+    fake_client = MagicMock()
+    fake_client.collections.get.return_value = fake_collection
+
+    store = WeaviateStore(
+        index_config=IndexConfig(),
+        weaviate_config=WeaviateConfig(),
+        client=fake_client,
+        embedder=FakeEmbedder([0.0]),
+    )
+
+    results = store.query_hybrid("anything")
+
+    assert results == []
