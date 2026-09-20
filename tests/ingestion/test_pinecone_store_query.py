@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 
 from src.ingestion.config import IndexConfig, PineconeConfig
 from src.ingestion.vector_stores.pinecone_store import PineconeStore
+from src.retrieval.results import RetrievalResult
 
 _METADATA = {
     "company": "Constellation Energy Corporation",
@@ -153,3 +154,90 @@ def test_query_hybrid_caches_the_bm25_index_across_calls() -> None:
     store.query_hybrid("anything else", top_k=2)
 
     fake_index.list.assert_called_once()
+
+
+class FakeReranker:
+    """Stand-in for CohereReranker that never hits the network."""
+
+    def __init__(self, reordered_ids: list[str]) -> None:
+        self.reordered_ids = reordered_ids
+        self.calls: list[tuple[str, list[RetrievalResult], int]] = []
+
+    def rerank(
+        self, query_text: str, candidates: list[RetrievalResult], top_k: int
+    ) -> list[RetrievalResult]:
+        self.calls.append((query_text, candidates, top_k))
+        by_id = {c.id: c for c in candidates}
+        return [by_id[id_] for id_ in self.reordered_ids][:top_k]
+
+
+def test_query_hybrid_reranked_widens_the_candidate_pool_then_reranks() -> None:
+    dense_match = SimpleNamespace(id="chunk_dense", score=0.9, metadata=_DENSE_ONLY_METADATA)
+    fake_index = MagicMock()
+    fake_index.query.return_value = SimpleNamespace(matches=[dense_match])
+    fake_index.list.return_value = iter(
+        [
+            SimpleNamespace(
+                vectors=[
+                    SimpleNamespace(id="chunk_dense"),
+                    SimpleNamespace(id="chunk_keyword"),
+                    SimpleNamespace(id="chunk_filler"),
+                ]
+            )
+        ]
+    )
+    fake_index.fetch.return_value = SimpleNamespace(
+        vectors={
+            "chunk_dense": SimpleNamespace(metadata=_DENSE_ONLY_METADATA),
+            "chunk_keyword": SimpleNamespace(metadata=_KEYWORD_ONLY_METADATA),
+            "chunk_filler": SimpleNamespace(metadata=_FILLER_METADATA),
+        }
+    )
+    reranker = FakeReranker(reordered_ids=["chunk_keyword", "chunk_dense"])
+
+    store = PineconeStore(
+        index_config=IndexConfig(),
+        pinecone_config=PineconeConfig(),
+        client=MagicMock(),
+        embedder=FakeEmbedder([0.1, 0.2, 0.3]),
+        reranker=reranker,
+    )
+    store._index = fake_index
+
+    results = store.query_hybrid_reranked(
+        "mine suspension in Niger", top_k=1, rerank_candidates=2
+    )
+
+    assert [r.id for r in results] == ["chunk_keyword"]
+    query_text, candidates, top_k = reranker.calls[0]
+    assert query_text == "mine suspension in Niger"
+    assert top_k == 1
+    assert {c.id for c in candidates} == {"chunk_dense", "chunk_keyword"}
+
+
+def test_query_hybrid_reranked_lazily_constructs_a_default_reranker(monkeypatch) -> None:
+    fake_index = MagicMock()
+    fake_index.query.return_value = SimpleNamespace(matches=[])
+    fake_index.list.return_value = iter([SimpleNamespace(vectors=[])])
+    fake_index.fetch.return_value = SimpleNamespace(vectors={})
+    store = PineconeStore(
+        index_config=IndexConfig(),
+        pinecone_config=PineconeConfig(),
+        client=MagicMock(),
+        embedder=FakeEmbedder([0.0]),
+    )
+    store._index = fake_index
+    assert store.reranker is None  # never eagerly constructed, no COHERE_API_KEY needed
+
+    fake_default_reranker = FakeReranker(reordered_ids=[])
+    fake_reranker_cls = MagicMock(return_value=fake_default_reranker)
+    monkeypatch.setattr(
+        "src.ingestion.vector_stores.pinecone_store.CohereReranker", fake_reranker_cls
+    )
+
+    results = store.query_hybrid_reranked("anything", top_k=3, rerank_candidates=5)
+
+    fake_reranker_cls.assert_called_once_with()
+    assert store.reranker is fake_default_reranker
+    assert results == []
+    assert fake_default_reranker.calls[0][2] == 3

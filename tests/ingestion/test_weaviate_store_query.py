@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 
 from src.ingestion.config import IndexConfig, WeaviateConfig
 from src.ingestion.vector_stores.weaviate_store import WeaviateStore
+from src.retrieval.results import RetrievalResult
 
 _METADATA = {
     "company": "Constellation Energy Corporation",
@@ -139,3 +140,79 @@ def test_query_hybrid_defaults_top_k_to_five() -> None:
     results = store.query_hybrid("anything")
 
     assert results == []
+
+
+class FakeReranker:
+    """Stand-in for CohereReranker that never hits the network."""
+
+    def __init__(self, reordered_ids: list[str]) -> None:
+        self.reordered_ids = reordered_ids
+        self.calls: list[tuple[str, list[RetrievalResult], int]] = []
+
+    def rerank(
+        self, query_text: str, candidates: list[RetrievalResult], top_k: int
+    ) -> list[RetrievalResult]:
+        self.calls.append((query_text, candidates, top_k))
+        by_id = {c.id: c for c in candidates}
+        return [by_id[id_] for id_ in self.reordered_ids][:top_k]
+
+
+def test_query_hybrid_reranked_widens_the_candidate_pool_then_reranks() -> None:
+    dense_obj = SimpleNamespace(
+        uuid="dense-uuid", properties=_DENSE_ONLY_METADATA, metadata=SimpleNamespace(distance=0.1)
+    )
+    bm25_obj = SimpleNamespace(
+        uuid="keyword-uuid", properties=_KEYWORD_ONLY_METADATA, metadata=SimpleNamespace(score=5.0)
+    )
+    fake_collection = MagicMock()
+    fake_collection.query.near_vector.return_value = SimpleNamespace(objects=[dense_obj])
+    fake_collection.query.bm25.return_value = SimpleNamespace(objects=[bm25_obj])
+    fake_client = MagicMock()
+    fake_client.collections.get.return_value = fake_collection
+    reranker = FakeReranker(reordered_ids=["keyword-uuid", "dense-uuid"])
+
+    store = WeaviateStore(
+        index_config=IndexConfig(),
+        weaviate_config=WeaviateConfig(),
+        client=fake_client,
+        embedder=FakeEmbedder([0.4, 0.5]),
+        reranker=reranker,
+    )
+
+    results = store.query_hybrid_reranked(
+        "mine suspension in Niger", top_k=1, rerank_candidates=2
+    )
+
+    assert [r.id for r in results] == ["keyword-uuid"]
+    query_text, candidates, top_k = reranker.calls[0]
+    assert query_text == "mine suspension in Niger"
+    assert top_k == 1
+    assert {c.id for c in candidates} == {"dense-uuid", "keyword-uuid"}
+
+
+def test_query_hybrid_reranked_lazily_constructs_a_default_reranker(monkeypatch) -> None:
+    fake_collection = MagicMock()
+    fake_collection.query.near_vector.return_value = SimpleNamespace(objects=[])
+    fake_collection.query.bm25.return_value = SimpleNamespace(objects=[])
+    fake_client = MagicMock()
+    fake_client.collections.get.return_value = fake_collection
+    store = WeaviateStore(
+        index_config=IndexConfig(),
+        weaviate_config=WeaviateConfig(),
+        client=fake_client,
+        embedder=FakeEmbedder([0.0]),
+    )
+    assert store.reranker is None  # never eagerly constructed, no COHERE_API_KEY needed
+
+    fake_default_reranker = FakeReranker(reordered_ids=[])
+    fake_reranker_cls = MagicMock(return_value=fake_default_reranker)
+    monkeypatch.setattr(
+        "src.ingestion.vector_stores.weaviate_store.CohereReranker", fake_reranker_cls
+    )
+
+    results = store.query_hybrid_reranked("anything", top_k=3, rerank_candidates=5)
+
+    fake_reranker_cls.assert_called_once_with()
+    assert store.reranker is fake_default_reranker
+    assert results == []
+    assert fake_default_reranker.calls[0][2] == 3

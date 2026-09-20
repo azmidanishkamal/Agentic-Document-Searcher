@@ -13,6 +13,7 @@ from src.ingestion.models import Chunk
 from src.retrieval.embedding import embed_query
 from src.retrieval.fusion import default_candidate_pool_size, reciprocal_rank_fusion
 from src.retrieval.keyword_search import BM25Index
+from src.retrieval.reranking import CohereReranker
 from src.retrieval.results import RetrievalResult, result_from_metadata
 
 logger = logging.getLogger(__name__)
@@ -27,14 +28,16 @@ class PineconeStore:
         pinecone_config: PineconeConfig,
         client: Pinecone | None = None,
         embedder: OpenAIEmbedder | None = None,
+        reranker: CohereReranker | None = None,
     ) -> None:
         self.index_config = index_config
         self.pinecone_config = pinecone_config
         self.client = client or Pinecone()
         self._index = None
-        # Lazy default so constructing a store never requires an OpenAI API
-        # key unless `query` is actually called.
+        # Lazy defaults so constructing a store never requires an OpenAI or
+        # Cohere API key unless `query`/`query_hybrid_reranked` is called.
         self.embedder = embedder
+        self.reranker = reranker
         # Pinecone has no native full-text search; built lazily by scanning
         # the index once, then cached for reuse across `query_hybrid` calls.
         self._bm25_index: BM25Index | None = None
@@ -97,6 +100,15 @@ class PineconeStore:
         dense_results = self.query(query_text, top_k=pool)
         sparse_results = self._keyword_index().search(query_text, top_k=pool)
         return reciprocal_rank_fusion([dense_results, sparse_results], top_k=top_k)
+
+    def query_hybrid_reranked(
+        self, query_text: str, top_k: int = 5, rerank_candidates: int = 20
+    ) -> list[RetrievalResult]:
+        if self.reranker is None:
+            self.reranker = CohereReranker()
+
+        candidates = self.query_hybrid(query_text, top_k=rerank_candidates)
+        return self.reranker.rerank(query_text, candidates, top_k=top_k)
 
     def close(self) -> None:
         # Index clients hold their own connection pool separate from the

@@ -23,6 +23,7 @@ from src.ingestion.embeddings import OpenAIEmbedder
 from src.ingestion.models import Chunk
 from src.retrieval.embedding import embed_query
 from src.retrieval.fusion import default_candidate_pool_size, reciprocal_rank_fusion
+from src.retrieval.reranking import CohereReranker
 from src.retrieval.results import RetrievalResult, result_from_metadata
 
 logger = logging.getLogger(__name__)
@@ -37,6 +38,7 @@ class WeaviateStore:
         weaviate_config: WeaviateConfig,
         client: weaviate.WeaviateClient | None = None,
         embedder: OpenAIEmbedder | None = None,
+        reranker: CohereReranker | None = None,
     ) -> None:
         self.index_config = index_config
         self.weaviate_config = weaviate_config
@@ -44,9 +46,10 @@ class WeaviateStore:
             cluster_url=os.environ["WEAVIATE_URL"],
             auth_credentials=Auth.api_key(os.environ["WEAVIATE_API_KEY"]),
         )
-        # Lazy default so constructing a store never requires an OpenAI API
-        # key unless `query` is actually called.
+        # Lazy defaults so constructing a store never requires an OpenAI or
+        # Cohere API key unless `query`/`query_hybrid_reranked` is called.
         self.embedder = embedder
+        self.reranker = reranker
 
     def ensure_index(self) -> None:
         name = self.weaviate_config.collection_name
@@ -122,6 +125,15 @@ class WeaviateStore:
         ]
 
         return reciprocal_rank_fusion([dense_results, sparse_results], top_k=top_k)
+
+    def query_hybrid_reranked(
+        self, query_text: str, top_k: int = 5, rerank_candidates: int = 20
+    ) -> list[RetrievalResult]:
+        if self.reranker is None:
+            self.reranker = CohereReranker()
+
+        candidates = self.query_hybrid(query_text, top_k=rerank_candidates)
+        return self.reranker.rerank(query_text, candidates, top_k=top_k)
 
     def close(self) -> None:
         self.client.close()

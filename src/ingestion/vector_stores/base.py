@@ -28,6 +28,14 @@ class VectorStore(Protocol):
         Pinecone); the fusion step is identical across backends."""
         ...
 
+    def query_hybrid_reranked(
+        self, query_text: str, top_k: int = 5, rerank_candidates: int = 20
+    ) -> list[RetrievalResult]:
+        """`query_hybrid` widened to `rerank_candidates`, then reranked down to
+        `top_k` by Cohere Rerank. Kept alongside `query`/`query_hybrid` (both
+        left intact) so all three retrieval modes can be compared in M4."""
+        ...
+
     def close(self) -> None:
         """Release the underlying client connection."""
         ...

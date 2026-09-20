@@ -17,6 +17,7 @@ dependencies = [
     "weaviate-client",
     "python-dotenv",
     "rank-bm25",
+    "cohere",
 ]
 
 [project.optional-dependencies]
