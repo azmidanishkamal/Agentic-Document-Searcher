@@ -35,6 +35,10 @@ class AgentState(TypedDict):
     retrieved_chunks: list[RetrievalResult]
     grade: GradeDecision | None
     grade_reason: str
+    missing_parts: list[str]  # sub-parts the grader found unsupported
+    # Chunks the grader cited as evidence for supported sub-parts; carried into
+    # the next retrieval so a targeted retry query doesn't lose them.
+    kept_chunks: list[RetrievalResult]
     retry_count: int
     answer: str
     answerable: bool
@@ -59,6 +63,8 @@ def initial_state(question: str) -> AgentState:
         retrieved_chunks=[],
         grade=None,
         grade_reason="",
+        missing_parts=[],
+        kept_chunks=[],
         retry_count=0,
         answer="",
         answerable=False,

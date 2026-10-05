@@ -78,12 +78,15 @@ class AgentNodes:
         self.deps = deps
 
     def retrieve(self, state: AgentState) -> dict[str, Any]:
-        chunks = run_retrieval(
+        new_chunks = run_retrieval(
             self.deps.store,
             self.deps.retrieval_mode,
             state["search_query"],
             self.deps.top_k,
         )
+        kept = state["kept_chunks"]
+        kept_ids = {chunk.id for chunk in kept}
+        chunks = kept + [chunk for chunk in new_chunks if chunk.id not in kept_ids]
         return {
             "retrieved_chunks": chunks,
             "trace": _event(
@@ -91,12 +94,14 @@ class AgentNodes:
                 state,
                 query=state["search_query"],
                 mode=self.deps.retrieval_mode,
-                chunk_ids=[chunk.id for chunk in chunks],
+                chunk_ids=[chunk.id for chunk in new_chunks],
+                kept_chunk_ids=sorted(kept_ids),
             ),
         }
 
     def grade(self, state: AgentState) -> dict[str, Any]:
         chunks = state["retrieved_chunks"]
+        sub_parts: list[dict[str, Any]] = []
         if not chunks:
             decision, reason = "insufficient", "No chunks were retrieved."
         else:
@@ -106,18 +111,42 @@ class AgentNodes:
                 schema_name=prompts.GRADE_SCHEMA_NAME,
                 schema=prompts.GRADE_SCHEMA,
             )
+            sub_parts = result["sub_parts"]
             decision, reason = result["decision"], result["reason"]
+            # The verdict must agree with the decomposition: any unsupported
+            # sub-part means the context can't answer the whole question.
+            if any(not part["supported"] for part in sub_parts):
+                decision = "insufficient"
+
+        missing_parts = [part["part"] for part in sub_parts if not part["supported"]]
+        evidence_ids = {
+            chunk_id
+            for part in sub_parts
+            if part["supported"]
+            for chunk_id in part["evidence_chunk_ids"]
+        }
         return {
             "grade": decision,
             "grade_reason": reason,
-            "trace": _event("grade", state, decision=decision, reason=reason),
+            "missing_parts": missing_parts,
+            "kept_chunks": [chunk for chunk in chunks if chunk.id in evidence_ids],
+            "trace": _event(
+                "grade",
+                state,
+                decision=decision,
+                reason=reason,
+                sub_parts=sub_parts,
+            ),
         }
 
     def reformulate(self, state: AgentState) -> dict[str, Any]:
         result = self.deps.grader_llm.complete_json(
             system=prompts.REFORMULATE_SYSTEM,
             user=prompts.reformulate_user_prompt(
-                state["question"], state["search_query"], state["grade_reason"]
+                state["question"],
+                state["search_query"],
+                state["grade_reason"],
+                state["missing_parts"],
             ),
             schema_name=prompts.REFORMULATE_SCHEMA_NAME,
             schema=prompts.REFORMULATE_SCHEMA,
@@ -129,6 +158,7 @@ class AgentNodes:
             "trace": _event(
                 "reformulate",
                 state,
+                missing_parts=state["missing_parts"],
                 previous_query=state["search_query"],
                 new_query=new_query,
             ),

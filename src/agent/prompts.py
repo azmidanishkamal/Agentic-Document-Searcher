@@ -8,10 +8,26 @@ GRADE_SCHEMA_NAME = "grade_context"
 GRADE_SCHEMA = {
     "type": "object",
     "properties": {
+        "sub_parts": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "part": {"type": "string"},
+                    "supported": {"type": "boolean"},
+                    "evidence_chunk_ids": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                    },
+                },
+                "required": ["part", "supported", "evidence_chunk_ids"],
+                "additionalProperties": False,
+            },
+        },
         "decision": {"type": "string", "enum": ["sufficient", "insufficient"]},
         "reason": {"type": "string"},
     },
-    "required": ["decision", "reason"],
+    "required": ["sub_parts", "decision", "reason"],
     "additionalProperties": False,
 }
 
@@ -19,13 +35,41 @@ GRADE_SYSTEM = """\
 You judge whether excerpts retrieved from SEC filings (10-K / 40-F) contain \
 enough information to answer a user's question.
 
-Answer "sufficient" only if the excerpts directly contain the facts needed to \
-answer the question for the company and fiscal year it asks about. Answer \
-"insufficient" if key facts are missing, the excerpts cover the wrong company \
-or year, or they are only loosely related.
+Step 1 - Decompose. List the distinct sub-parts the question requires an \
+answer to. A sub-part is one piece of information the answer must contain:
+- each company named or compared (in a comparison, each side is its own \
+sub-part),
+- each fiscal year or filing the question names (e.g. "in fiscal years 2021 \
+and 2022" is two sub-parts, one per year),
+- each metric, figure, or fact asked for, for each company and fiscal year it \
+applies to,
+- for questions asking for several items and an attribute of each (e.g. \
+"which segments grew, and by how much"), the items themselves AND the \
+requested attribute for each item you identify.
+A single-fact question has exactly one sub-part. Do not invent sub-parts the \
+question does not ask for (e.g. drivers, context, or explanations).
 
-In "reason", state concisely what is present and, if insufficient, exactly \
-what is missing. The reason is used to rewrite the search query."""
+Step 2 - Check coverage. For each sub-part, decide whether the excerpts \
+contain the evidence needed for it, and list the supporting excerpt ids in \
+"evidence_chunk_ids".
+- Evidence counts if the excerpts contain the inputs needed, even when the \
+final value must be computed from them. A sum, difference, percentage change, \
+or comparison of figures that are present in the excerpts is supported; the \
+computed result does not need to appear verbatim.
+- When the question asks for an attribute of each of several items (e.g. "the \
+cost of each project"), one figure cannot satisfy "each": if the question \
+implies several items each needing a figure and the excerpts give only one, \
+that sub-part is not supported.
+- Evidence does not count if it is for the wrong company or fiscal year, only \
+loosely related, or if the sub-part could only be answered by stating that \
+the excerpts don't mention it.
+
+Step 3 - Decide. "sufficient" if and only if every sub-part is supported. \
+Otherwise "insufficient".
+
+In "reason", state which sub-parts are supported and, if insufficient, \
+exactly which are missing (company, metric, fiscal year). The reason is used \
+to rewrite the search query, so name the missing information specifically."""
 
 REFORMULATE_SCHEMA_NAME = "reformulate_query"
 REFORMULATE_SCHEMA = {
@@ -36,15 +80,21 @@ REFORMULATE_SCHEMA = {
 }
 
 REFORMULATE_SYSTEM = """\
-You rewrite search queries for a hybrid (semantic + keyword) search engine over \
-SEC annual filings (10-K / 40-F).
+You write follow-up search queries for a hybrid (semantic + keyword) search \
+engine over SEC annual filings (10-K / 40-F).
 
-Given the user's question, the query that was just tried, and why its results \
-were judged insufficient, write one new query more likely to retrieve the \
-missing information. Use the vocabulary filings actually use (e.g. line-item \
-names, "Risk Factors", "Management's Discussion and Analysis"), keep the \
-company name and fiscal year if the question has them, and do not simply \
-repeat the previous query. Return only the query."""
+A previous search for the user's question left some required information \
+missing. Excerpts covering the parts already found are kept, so do NOT \
+search for those again. Write one new query aimed only at the missing \
+information:
+- Name the specific company, metric or fact, and fiscal year that is missing \
+(e.g. "Acme Corp 2022 long-term debt maturities schedule", "Acme Corp \
+warehouse divestiture sale proceeds").
+- Use the vocabulary filings actually use (line-item names, "Risk Factors", \
+"Management's Discussion and Analysis", "purchase price", "capital \
+expenditures").
+- Do not restate the whole original question and do not repeat the previous \
+query. Return only the query."""
 
 GENERATE_SCHEMA_NAME = "grounded_answer"
 GENERATE_SCHEMA = {
@@ -101,12 +151,14 @@ def grade_user_prompt(question: str, chunks: list[RetrievalResult]) -> str:
 
 
 def reformulate_user_prompt(
-    question: str, previous_query: str, grade_reason: str
+    question: str, previous_query: str, grade_reason: str, missing_parts: list[str]
 ) -> str:
+    missing = "\n".join(f"- {part}" for part in missing_parts) or "- (not itemized)"
     return (
         f"Question: {question}\n"
         f"Previous query: {previous_query}\n"
-        f"Why the results were insufficient: {grade_reason}"
+        f"Missing information:\n{missing}\n"
+        f"Grader's explanation: {grade_reason}"
     )
 
 

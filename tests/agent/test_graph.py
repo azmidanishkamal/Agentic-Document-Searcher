@@ -69,8 +69,18 @@ class ScriptedLLM:
         return self.responses[schema_name].pop(0)
 
 
-def _grade(decision: str, reason: str = "r") -> dict[str, Any]:
-    return {"decision": decision, "reason": reason}
+def _part(
+    part: str, supported: bool, evidence: list[str] | None = None
+) -> dict[str, Any]:
+    return {"part": part, "supported": supported, "evidence_chunk_ids": evidence or []}
+
+
+def _grade(
+    decision: str, reason: str = "r", sub_parts: list[dict[str, Any]] | None = None
+) -> dict[str, Any]:
+    if sub_parts is None:
+        sub_parts = [_part("the fact asked for", decision == "sufficient", ["c1"])]
+    return {"sub_parts": sub_parts, "decision": decision, "reason": reason}
 
 
 def _answer(chunk_ids: list[str], answerable: bool = True) -> dict[str, Any]:
@@ -297,3 +307,116 @@ def test_generate_prompt_includes_filing_metadata_for_each_chunk() -> None:
     assert "Cameco Corporation" in text
     assert "fiscal year 2023" in text
     assert _FILING.source_url in text
+
+
+# --- sub-part coverage grading ---
+
+
+class SequencedStore(FakeStore):
+    """Returns a different result list per retrieval call."""
+
+    def __init__(self, per_call: list[list[RetrievalResult]]) -> None:
+        super().__init__([])
+        self.per_call = per_call
+
+    def query_hybrid_reranked(
+        self, query_text: str, top_k: int = 5, rerank_candidates: int = 20
+    ) -> list[RetrievalResult]:
+        self.calls.append(("hybrid_reranked", query_text))
+        return self.per_call[len(self.calls) - 1]
+
+
+def test_unsupported_sub_part_overrides_a_sufficient_verdict() -> None:
+    store = FakeStore([_chunk("c1")])
+    inconsistent = _grade(
+        "sufficient",
+        sub_parts=[
+            _part("Cameco side", True, ["c1"]),
+            _part("Constellation side", False),
+        ],
+    )
+    llm = ScriptedLLM(
+        {
+            prompts.GRADE_SCHEMA_NAME: [inconsistent, _grade("sufficient")],
+            prompts.REFORMULATE_SCHEMA_NAME: [{"query": "q2"}],
+            prompts.GENERATE_SCHEMA_NAME: [_answer(["c1"])],
+        }
+    )
+
+    result = answer_question("compare", store=store, llm=llm)
+
+    grades = [e["detail"]["decision"] for e in result["trace"] if e["node"] == "grade"]
+    assert grades == ["insufficient", "sufficient"]
+    assert result["retry_count"] == 1
+
+
+def test_reformulate_prompt_lists_the_missing_sub_parts() -> None:
+    store = FakeStore([_chunk("c1")])
+    llm = ScriptedLLM(
+        {
+            prompts.GRADE_SCHEMA_NAME: [
+                _grade(
+                    "insufficient",
+                    reason="no purchase price",
+                    sub_parts=[
+                        _part("which acquisition", True, ["c1"]),
+                        _part("acquisition purchase price", False),
+                    ],
+                ),
+                _grade("sufficient"),
+            ],
+            prompts.REFORMULATE_SCHEMA_NAME: [{"query": "acquisition purchase price"}],
+            prompts.GENERATE_SCHEMA_NAME: [_answer(["c1"])],
+        }
+    )
+
+    result = answer_question("q", store=store, llm=llm)
+
+    reformulate_prompt = next(
+        user for name, user in llm.calls if name == prompts.REFORMULATE_SCHEMA_NAME
+    )
+    assert "- acquisition purchase price" in reformulate_prompt
+    assert "- which acquisition" not in reformulate_prompt
+    assert "no purchase price" in reformulate_prompt
+    reformulate_event = next(e for e in result["trace"] if e["node"] == "reformulate")
+    assert reformulate_event["detail"]["missing_parts"] == [
+        "acquisition purchase price"
+    ]
+
+
+def test_evidence_for_supported_parts_survives_a_targeted_retry() -> None:
+    cameco = _chunk("cameco", "Cameco uranium supply risk")
+    noise = _chunk("noise", "unrelated")
+    constellation = _chunk("ceg", "Constellation fuel procurement")
+    store = SequencedStore([[cameco, noise], [constellation]])
+    llm = ScriptedLLM(
+        {
+            prompts.GRADE_SCHEMA_NAME: [
+                _grade(
+                    "insufficient",
+                    sub_parts=[
+                        _part("Cameco view", True, ["cameco"]),
+                        _part("Constellation view", False),
+                    ],
+                ),
+                _grade(
+                    "sufficient",
+                    sub_parts=[
+                        _part("Cameco view", True, ["cameco"]),
+                        _part("Constellation view", True, ["ceg"]),
+                    ],
+                ),
+            ],
+            prompts.REFORMULATE_SCHEMA_NAME: [{"query": "Constellation fuel risk"}],
+            prompts.GENERATE_SCHEMA_NAME: [_answer(["cameco", "ceg"])],
+        }
+    )
+
+    result = answer_question("compare", store=store, llm=llm)
+
+    # Supported evidence is kept, unsupported noise is dropped, new hits added.
+    assert [c.id for c in result["retrieved_chunks"]] == ["cameco", "ceg"]
+    second_grade_prompt = [u for n, u in llm.calls if n == prompts.GRADE_SCHEMA_NAME][1]
+    assert "[cameco]" in second_grade_prompt
+    assert "[noise]" not in second_grade_prompt
+    assert [c["chunk_id"] for c in result["citations"]] == ["cameco", "ceg"]
