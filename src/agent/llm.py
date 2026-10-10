@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import os
+from dataclasses import dataclass
 from typing import Any, Protocol
 
 from openai import OpenAI
@@ -37,12 +38,25 @@ class LLMClient(Protocol):
         ...
 
 
+@dataclass(frozen=True)
+class LLMUsage:
+    """Token counts for one completion call."""
+
+    model: str
+    prompt_tokens: int
+    completion_tokens: int
+
+
 class OpenAILLMClient:
-    """`LLMClient` backed by OpenAI chat completions with strict JSON-schema output."""
+    """`LLMClient` backed by OpenAI chat completions with strict JSON-schema output.
+
+    Every call's token usage is appended to `usage`, so callers (e.g. the eval
+    harness) can attribute tokens and cost to a question."""
 
     def __init__(self, model: str, client: OpenAI | None = None) -> None:
         self.model = model
         self.client = client or OpenAI()
+        self.usage: list[LLMUsage] = []
 
     def complete_json(
         self, *, system: str, user: str, schema_name: str, schema: dict[str, Any]
@@ -58,6 +72,14 @@ class OpenAILLMClient:
                 "json_schema": {"name": schema_name, "schema": schema, "strict": True},
             },
         )
+        if response.usage is not None:
+            self.usage.append(
+                LLMUsage(
+                    model=self.model,
+                    prompt_tokens=response.usage.prompt_tokens,
+                    completion_tokens=response.usage.completion_tokens,
+                )
+            )
         content = response.choices[0].message.content
         if not content:
             raise RuntimeError(f"{self.model} returned no content for {schema_name}")
