@@ -1,0 +1,1894 @@
+{
+  "run": {
+    "run_id": "2026-10-10T03-48-03Z_pinecone_hybrid_reranked",
+    "started_at": "2026-10-10T03:48:03.657988+00:00",
+    "finished_at": "2026-10-10T03:52:08.469254+00:00",
+    "git_commit": "beeef57",
+    "config": {
+      "backend": "pinecone",
+      "retrieval_mode": "hybrid_reranked",
+      "judge_model": "gpt-5.4",
+      "agent_model": "gpt-5.4",
+      "grade_model": "gpt-5.4",
+      "max_retries": 2,
+      "top_k": 5,
+      "golden_path": "eval_data/golden_set.jsonl",
+      "golden_sha256": "2cbd9cd909adafccf27d8f855d62978ed40b0ea1d0d940590a8de07a970f5f21",
+      "question_ids": null
+    }
+  },
+  "summary": {
+    "n": 20,
+    "n_errors": 0,
+    "answer_passed": 18,
+    "answer_pass_rate": 0.9,
+    "retrieval_n": 17,
+    "retrieval_passed": 16,
+    "retrieval_pass_rate": 0.9412,
+    "by_question_type": {
+      "single_fact_lookup": {
+        "n": 3,
+        "passed": 3,
+        "pass_rate": 1.0
+      },
+      "single_fact_lookup_table": {
+        "n": 4,
+        "passed": 4,
+        "pass_rate": 1.0
+      },
+      "multi_chunk_synthesis": {
+        "n": 3,
+        "passed": 2,
+        "pass_rate": 0.6667
+      },
+      "cross_company_comparison": {
+        "n": 2,
+        "passed": 1,
+        "pass_rate": 0.5
+      },
+      "exact_term_keyword": {
+        "n": 2,
+        "passed": 2,
+        "pass_rate": 1.0
+      },
+      "temporal": {
+        "n": 3,
+        "passed": 3,
+        "pass_rate": 1.0
+      },
+      "negative_unanswerable": {
+        "n": 3,
+        "passed": 3,
+        "pass_rate": 1.0
+      }
+    },
+    "by_scoring_mode": {
+      "reference": {
+        "n": 15,
+        "passed": 14,
+        "pass_rate": 0.9333
+      },
+      "rubric": {
+        "n": 2,
+        "passed": 1,
+        "pass_rate": 0.5
+      },
+      "negative": {
+        "n": 3,
+        "passed": 3,
+        "pass_rate": 1.0
+      }
+    },
+    "latency_s": {
+      "total": 190.766,
+      "mean": 9.538,
+      "p50": 6.295,
+      "max": 22.295
+    },
+    "tokens": {
+      "agent_prompt": 210487,
+      "agent_completion": 9651,
+      "judge_prompt": 74927,
+      "judge_completion": 2463
+    },
+    "rerank_searches": 29,
+    "cost_usd": {
+      "agent": null,
+      "rerank": null,
+      "judge": null,
+      "total": null,
+      "complete": false
+    },
+    "mean_retry_count": 0.45
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "question": "What percentage ownership stake did Cameco acquire in Westinghouse, and who holds the remaining interest?",
+      "question_type": "single_fact_lookup",
+      "eval_type": "reference",
+      "scoring_mode": "reference",
+      "golden_answer": "Cameco holds a 49% equity-accounted interest in Westinghouse, acquired in partnership with Brookfield (which holds the remaining 51%). The acquisition closed on November 7, 2023.",
+      "agent": {
+        "answer": "Cameco acquired a 49% ownership interest in Westinghouse, and Brookfield holds the remaining 51% interest [CCJ_2023_40-F_0293][CCJ_2023_40-F_0436].",
+        "answerable": true,
+        "retry_count": 0,
+        "citations": [
+          {
+            "chunk_id": "CCJ_2023_40-F_0293",
+            "company": "Cameco Corporation",
+            "ticker": "CCJ",
+            "fiscal_year": 2023,
+            "form_type": "40-F",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1009001/000119312524075464/0001193125-24-075464-index.htm"
+          },
+          {
+            "chunk_id": "CCJ_2023_40-F_0436",
+            "company": "Cameco Corporation",
+            "ticker": "CCJ",
+            "fiscal_year": 2023,
+            "form_type": "40-F",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1009001/000119312524075464/0001193125-24-075464-index.htm"
+          }
+        ],
+        "retrieved_chunk_ids": [
+          "CCJ_2023_40-F_0293",
+          "CCJ_2023_40-F_0436",
+          "CCJ_2023_40-F_0375",
+          "CCJ_2025_40-F_0450",
+          "CCJ_2024_40-F_0165"
+        ],
+        "latency_s": 19.795
+      },
+      "answer_score": {
+        "passed": true,
+        "reason": "The answer matches the key facts asked: Cameco acquired a 49% stake in Westinghouse, and Brookfield holds the remaining 51%. No incorrect extra claims are included."
+      },
+      "retrieval_score": {
+        "passed": true,
+        "reason": "The retrieved chunks explicitly state that Cameco acquired/holds a 49% interest in Westinghouse and that Brookfield holds the remaining 51% interest. They also note the acquisition closed effective November 7, 2023, matching the reference.",
+        "golden_chunk_id_recall": 1.0
+      },
+      "error": null,
+      "usage": {
+        "agent": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3949,
+            "completion_tokens": 97
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4189,
+            "completion_tokens": 200
+          }
+        ],
+        "judge": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 480,
+            "completion_tokens": 52
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3700,
+            "completion_tokens": 66
+          }
+        ],
+        "rerank_searches": 1
+      },
+      "cost_usd": {
+        "agent": null,
+        "rerank": null,
+        "judge": null,
+        "total": null
+      }
+    },
+    {
+      "id": "q02",
+      "question": "What was Cameco's net earnings attributable to equity holders for fiscal year 2023, in Canadian dollars?",
+      "question_type": "single_fact_lookup_table",
+      "eval_type": "reference",
+      "scoring_mode": "reference",
+      "golden_answer": "$361 million CAD",
+      "agent": {
+        "answer": "Cameco's net earnings attributable to equity holders for fiscal year 2023 were C$360,847 thousand, which is approximately C$360.847 million.[CCJ_2023_40-F_0259]",
+        "answerable": true,
+        "retry_count": 0,
+        "citations": [
+          {
+            "chunk_id": "CCJ_2023_40-F_0259",
+            "company": "Cameco Corporation",
+            "ticker": "CCJ",
+            "fiscal_year": 2023,
+            "form_type": "40-F",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1009001/000119312524075464/0001193125-24-075464-index.htm"
+          }
+        ],
+        "retrieved_chunk_ids": [
+          "CCJ_2023_40-F_0260",
+          "CCJ_2023_40-F_0259",
+          "CCJ_2023_40-F_0403",
+          "CCJ_2023_40-F_0352",
+          "CCJ_2023_40-F_0408"
+        ],
+        "latency_s": 6.338
+      },
+      "answer_score": {
+        "passed": true,
+        "reason": "The answer gives C$360,847 thousand, which equals C$360.847 million and reasonably rounds to the reference value of C$361 million CAD for fiscal 2023. No conflicting facts are stated."
+      },
+      "retrieval_score": {
+        "passed": true,
+        "reason": "The retrieved chunks explicitly state Cameco\u2019s 2023 net earnings attributable to equity holders as 360,847 ($Cdn thousands), which rounds to $361 million CAD, matching the reference.",
+        "golden_chunk_id_recall": 0.0
+      },
+      "error": null,
+      "usage": {
+        "agent": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3934,
+            "completion_tokens": 81
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4174,
+            "completion_tokens": 193
+          }
+        ],
+        "judge": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 440,
+            "completion_tokens": 58
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3647,
+            "completion_tokens": 54
+          }
+        ],
+        "rerank_searches": 1
+      },
+      "cost_usd": {
+        "agent": null,
+        "rerank": null,
+        "judge": null,
+        "total": null
+      }
+    },
+    {
+      "id": "q03",
+      "question": "What was Centrus Energy's total revenue for fiscal year 2025, in US dollars?",
+      "question_type": "single_fact_lookup_table",
+      "eval_type": "reference",
+      "scoring_mode": "reference",
+      "golden_answer": "$448.7 million USD",
+      "agent": {
+        "answer": "Centrus Energy's total revenue for fiscal year 2025 was $448.7 million, or US$448,700,000 [LEU_2025_10-K_0111][LEU_2025_10-K_0216].",
+        "answerable": true,
+        "retry_count": 0,
+        "citations": [
+          {
+            "chunk_id": "LEU_2025_10-K_0111",
+            "company": "Centrus Energy Corp.",
+            "ticker": "LEU",
+            "fiscal_year": 2025,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1065059/000162828026007117/0001628280-26-007117-index.htm"
+          },
+          {
+            "chunk_id": "LEU_2025_10-K_0216",
+            "company": "Centrus Energy Corp.",
+            "ticker": "LEU",
+            "fiscal_year": 2025,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1065059/000162828026007117/0001628280-26-007117-index.htm"
+          }
+        ],
+        "retrieved_chunk_ids": [
+          "LEU_2025_10-K_0111",
+          "LEU_2025_10-K_0216",
+          "LEU_2025_10-K_0217",
+          "LEU_2024_10-K_0155",
+          "LEU_2025_10-K_0201"
+        ],
+        "latency_s": 4.749
+      },
+      "answer_score": {
+        "passed": true,
+        "reason": "The system answer states Centrus Energy's fiscal 2025 total revenue as $448.7 million (US$448,700,000), which matches the reference exactly."
+      },
+      "retrieval_score": {
+        "passed": true,
+        "reason": "The retrieved 2025 10-K chunks explicitly state Centrus Energy's total revenue for the year ended December 31, 2025 was $448.7 million, matching the reference. All needed facts are present.",
+        "golden_chunk_id_recall": 0.0
+      },
+      "error": null,
+      "usage": {
+        "agent": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3998,
+            "completion_tokens": 100
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4238,
+            "completion_tokens": 140
+          }
+        ],
+        "judge": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 446,
+            "completion_tokens": 50
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3708,
+            "completion_tokens": 60
+          }
+        ],
+        "rerank_searches": 1
+      },
+      "cost_usd": {
+        "agent": null,
+        "rerank": null,
+        "judge": null,
+        "total": null
+      }
+    },
+    {
+      "id": "q04",
+      "question": "What were Constellation Energy's total operating revenues for fiscal year 2024, in US dollars?",
+      "question_type": "single_fact_lookup_table",
+      "eval_type": "reference",
+      "scoring_mode": "reference",
+      "golden_answer": "$23,568 million (~$23.6 billion) USD",
+      "agent": {
+        "answer": "Constellation Energy's total operating revenues for fiscal year 2024 were $23,568 million, or approximately $23.568 billion.[CEG_2024_10-K_0162]",
+        "answerable": true,
+        "retry_count": 0,
+        "citations": [
+          {
+            "chunk_id": "CEG_2024_10-K_0162",
+            "company": "Constellation Energy Corporation",
+            "ticker": "CEG",
+            "fiscal_year": 2024,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1868275/000186827525000023/0001868275-25-000023-index.htm"
+          }
+        ],
+        "retrieved_chunk_ids": [
+          "CEG_2024_10-K_0162",
+          "CEG_2023_10-K_0172",
+          "CEG_2025_10-K_0159",
+          "CEG_2025_10-K_0154",
+          "CEG_2024_10-K_0168"
+        ],
+        "latency_s": 4.554
+      },
+      "answer_score": {
+        "passed": true,
+        "reason": "The answer matches the reference exactly: Constellation Energy's fiscal 2024 total operating revenues were $23,568 million (about $23.6 billion) USD. The slight precision difference in the billion conversion is acceptable."
+      },
+      "retrieval_score": {
+        "passed": true,
+        "reason": "The retrieved chunks explicitly state Constellation Energy's 2024 total operating revenues as 23,568 (in millions of U.S. dollars), which matches the reference of $23,568 million (~$23.6 billion).",
+        "golden_chunk_id_recall": 1.0
+      },
+      "error": null,
+      "usage": {
+        "agent": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3707,
+            "completion_tokens": 75
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3947,
+            "completion_tokens": 137
+          }
+        ],
+        "judge": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 442,
+            "completion_tokens": 61
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3419,
+            "completion_tokens": 63
+          }
+        ],
+        "rerank_searches": 1
+      },
+      "cost_usd": {
+        "agent": null,
+        "rerank": null,
+        "judge": null,
+        "total": null
+      }
+    },
+    {
+      "id": "q05",
+      "question": "What was NuScale Power's net loss for fiscal year 2024, in US dollars?",
+      "question_type": "single_fact_lookup_table",
+      "eval_type": "reference",
+      "scoring_mode": "reference",
+      "golden_answer": "A net loss of $348,387 thousand (~$348.4 million) USD. (FY2023 net loss was $180,115 thousand; FY2022 was $141,573 thousand.)",
+      "agent": {
+        "answer": "NuScale Power\u2019s net loss for fiscal year 2024 was $(348,387) thousand, i.e., a net loss of $348.387 million.[SMR_2024_10-K_0077]",
+        "answerable": true,
+        "retry_count": 0,
+        "citations": [
+          {
+            "chunk_id": "SMR_2024_10-K_0077",
+            "company": "NuScale Power Corporation",
+            "ticker": "SMR",
+            "fiscal_year": 2024,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1822966/000182296625000024/0001822966-25-000024-index.htm"
+          }
+        ],
+        "retrieved_chunk_ids": [
+          "SMR_2024_10-K_0123",
+          "SMR_2024_10-K_0077",
+          "SMR_2025_10-K_0116",
+          "SMR_2024_10-K_0124",
+          "SMR_2024_10-K_0080"
+        ],
+        "latency_s": 4.903
+      },
+      "answer_score": {
+        "passed": true,
+        "reason": "The answer states NuScale Power's FY2024 net loss as $(348,387) thousand, equivalent to $348.387 million, which matches the reference figure of $348,387 thousand (~$348.4 million)."
+      },
+      "retrieval_score": {
+        "passed": true,
+        "reason": "The retrieved FY2024 10-K chunk explicitly gives NuScale Power\u2019s 2024 net loss as $(348,387) thousand, which matches the reference ($348.387 million). It also includes the comparative 2023 and 2022 net losses, so all needed facts are present.",
+        "golden_chunk_id_recall": 1.0
+      },
+      "error": null,
+      "usage": {
+        "agent": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3641,
+            "completion_tokens": 80
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3881,
+            "completion_tokens": 139
+          }
+        ],
+        "judge": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 472,
+            "completion_tokens": 62
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3385,
+            "completion_tokens": 75
+          }
+        ],
+        "rerank_searches": 1
+      },
+      "cost_usd": {
+        "agent": null,
+        "rerank": null,
+        "judge": null,
+        "total": null
+      }
+    },
+    {
+      "id": "q06",
+      "question": "How much electricity does a single NuScale Power Module (NPM) produce?",
+      "question_type": "single_fact_lookup",
+      "eval_type": "reference",
+      "scoring_mode": "reference",
+      "golden_answer": "Each NuScale Power Module (NPM) is capable of producing 77 MWe.",
+      "agent": {
+        "answer": "A single NuScale Power Module (NPM) can generate 77 MWe of electricity.[SMR_2025_10-K_0018][SMR_2025_10-K_0027][SMR_2024_10-K_0018][SMR_2024_10-K_0027][SMR_2023_10-K_0025]",
+        "answerable": true,
+        "retry_count": 0,
+        "citations": [
+          {
+            "chunk_id": "SMR_2025_10-K_0018",
+            "company": "NuScale Power Corporation",
+            "ticker": "SMR",
+            "fiscal_year": 2025,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1822966/000182296626000018/0001822966-26-000018-index.htm"
+          },
+          {
+            "chunk_id": "SMR_2025_10-K_0027",
+            "company": "NuScale Power Corporation",
+            "ticker": "SMR",
+            "fiscal_year": 2025,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1822966/000182296626000018/0001822966-26-000018-index.htm"
+          },
+          {
+            "chunk_id": "SMR_2024_10-K_0018",
+            "company": "NuScale Power Corporation",
+            "ticker": "SMR",
+            "fiscal_year": 2024,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1822966/000182296625000024/0001822966-25-000024-index.htm"
+          },
+          {
+            "chunk_id": "SMR_2024_10-K_0027",
+            "company": "NuScale Power Corporation",
+            "ticker": "SMR",
+            "fiscal_year": 2024,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1822966/000182296625000024/0001822966-25-000024-index.htm"
+          },
+          {
+            "chunk_id": "SMR_2023_10-K_0025",
+            "company": "NuScale Power Corporation",
+            "ticker": "SMR",
+            "fiscal_year": 2023,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1822966/000182296624000039/0001822966-24-000039-index.htm"
+          }
+        ],
+        "retrieved_chunk_ids": [
+          "SMR_2025_10-K_0018",
+          "SMR_2024_10-K_0018",
+          "SMR_2025_10-K_0027",
+          "SMR_2023_10-K_0025",
+          "SMR_2024_10-K_0027"
+        ],
+        "latency_s": 5.849
+      },
+      "answer_score": {
+        "passed": true,
+        "reason": "The answer states that a single NuScale Power Module produces 77 MWe, which matches the reference exactly."
+      },
+      "retrieval_score": {
+        "passed": true,
+        "reason": "The retrieved chunks explicitly state that the NuScale Power Module (NPM) can generate or is capable of producing 77 MWe, including multiple direct mentions from NuScale filings. This fully supports the reference answer.",
+        "golden_chunk_id_recall": 0.0
+      },
+      "error": null,
+      "usage": {
+        "agent": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3850,
+            "completion_tokens": 162
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4090,
+            "completion_tokens": 148
+          }
+        ],
+        "judge": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 480,
+            "completion_tokens": 37
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3571,
+            "completion_tokens": 58
+          }
+        ],
+        "rerank_searches": 1
+      },
+      "cost_usd": {
+        "agent": null,
+        "rerank": null,
+        "judge": null,
+        "total": null
+      }
+    },
+    {
+      "id": "q07",
+      "question": "What U-235 concentration range defines HALEU, according to Centrus Energy's 10-K?",
+      "question_type": "single_fact_lookup",
+      "eval_type": "reference",
+      "scoring_mode": "reference",
+      "golden_answer": "HALEU (High-Assay Low-Enriched Uranium) has a U-235 concentration between 5% and 20%, versus standard LEU which is enriched below 5% U-235.",
+      "agent": {
+        "answer": "According to Centrus Energy\u2019s 2023 10-K, HALEU is defined as uranium enriched so that the U-235 concentration is between 5% and 20%. The filing contrasts this with existing reactors\u2019 LEU, which is below 5% U-235 [LEU_2023_10-K_0030].",
+        "answerable": true,
+        "retry_count": 0,
+        "citations": [
+          {
+            "chunk_id": "LEU_2023_10-K_0030",
+            "company": "Centrus Energy Corp.",
+            "ticker": "LEU",
+            "fiscal_year": 2023,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1065059/000106505924000013/0001065059-24-000013-index.htm"
+          }
+        ],
+        "retrieved_chunk_ids": [
+          "LEU_2023_10-K_0030",
+          "LEU_2025_10-K_0029",
+          "LEU_2024_10-K_0033",
+          "LEU_2024_10-K_0047",
+          "LEU_2025_10-K_0035"
+        ],
+        "latency_s": 5.257
+      },
+      "answer_score": {
+        "passed": true,
+        "reason": "The answer correctly states that HALEU is uranium with a U-235 concentration between 5% and 20%, matching the reference. The extra note that standard LEU is below 5% U-235 is also consistent."
+      },
+      "retrieval_score": {
+        "passed": true,
+        "reason": "The retrieved Centrus 10-K chunks explicitly state that existing LEU is below 5% U-235 and HALEU is between 5% and 20% U-235, which matches the reference\u2019s key facts.",
+        "golden_chunk_id_recall": 1.0
+      },
+      "error": null,
+      "usage": {
+        "agent": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3698,
+            "completion_tokens": 105
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3938,
+            "completion_tokens": 137
+          }
+        ],
+        "judge": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 500,
+            "completion_tokens": 62
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3443,
+            "completion_tokens": 62
+          }
+        ],
+        "rerank_searches": 1
+      },
+      "cost_usd": {
+        "agent": null,
+        "rerank": null,
+        "judge": null,
+        "total": null
+      }
+    },
+    {
+      "id": "q08",
+      "question": "What was Cameco's combined 2024 production (its share) from the McArthur River/Key Lake and Cigar Lake tier-one operations?",
+      "question_type": "multi_chunk_synthesis",
+      "eval_type": "reference",
+      "scoring_mode": "reference",
+      "golden_answer": "Approximately 23.4 million lbs U3O8 combined: 14.2 million lbs from McArthur River/Key Lake plus 9.2 million lbs from Cigar Lake. (This matches the 23.4M lb 'Total' figure in Cameco's consolidated uranium production table, which also includes Rabbit Lake and US ISR at ~0.)",
+      "agent": {
+        "answer": "Cameco\u2019s combined 2024 production (its share) from the McArthur River/Key Lake and Cigar Lake tier-one operations was 23.4 million pounds U3O8, calculated as 14.2 million pounds from McArthur River/Key Lake plus 9.2 million pounds from Cigar Lake [CCJ_2024_40-F_0080][CCJ_2024_40-F_0435].",
+        "answerable": true,
+        "retry_count": 0,
+        "citations": [
+          {
+            "chunk_id": "CCJ_2024_40-F_0080",
+            "company": "Cameco Corporation",
+            "ticker": "CCJ",
+            "fiscal_year": 2024,
+            "form_type": "40-F",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1009001/000119312525060350/0001193125-25-060350-index.htm"
+          },
+          {
+            "chunk_id": "CCJ_2024_40-F_0435",
+            "company": "Cameco Corporation",
+            "ticker": "CCJ",
+            "fiscal_year": 2024,
+            "form_type": "40-F",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1009001/000119312525060350/0001193125-25-060350-index.htm"
+          }
+        ],
+        "retrieved_chunk_ids": [
+          "CCJ_2025_40-F_0080",
+          "CCJ_2023_40-F_0081",
+          "CCJ_2024_40-F_0441",
+          "CCJ_2024_40-F_0080",
+          "CCJ_2024_40-F_0435"
+        ],
+        "latency_s": 6.252
+      },
+      "answer_score": {
+        "passed": true,
+        "reason": "The answer matches the reference exactly: 14.2 million lbs from McArthur River/Key Lake plus 9.2 million lbs from Cigar Lake, totaling 23.4 million lbs U3O8 for 2024."
+      },
+      "retrieval_score": {
+        "passed": true,
+        "reason": "The retrieved chunks explicitly provide Cameco\u2019s 2024 production (its share) of 14.2 million lbs from McArthur River/Key Lake and 9.2 million lbs from Cigar Lake, and show the combined total as 23.4 million lbs. These are exactly the key facts needed.",
+        "golden_chunk_id_recall": 0.5
+      },
+      "error": null,
+      "usage": {
+        "agent": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4039,
+            "completion_tokens": 138
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4279,
+            "completion_tokens": 230
+          }
+        ],
+        "judge": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 561,
+            "completion_tokens": 63
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3820,
+            "completion_tokens": 78
+          }
+        ],
+        "rerank_searches": 1
+      },
+      "cost_usd": {
+        "agent": null,
+        "rerank": null,
+        "judge": null,
+        "total": null
+      }
+    },
+    {
+      "id": "q09",
+      "question": "What are Constellation Energy's largest growth initiatives disclosed across its 10-Ks for fiscal years 2024 and 2025, and what is the approximate dollar scale of each?",
+      "question_type": "multi_chunk_synthesis",
+      "eval_type": "rubric",
+      "scoring_mode": "rubric",
+      "golden_answer": "",
+      "agent": {
+        "answer": "Across the provided 10-K excerpts for fiscal years 2024 and 2025, Constellation Energy identifies its largest growth initiatives through the growth-capital portions of planned capital expenditures.\n\nFor fiscal year 2024 (covering planned 2025\u20132026 spending), the company says its capital expenditure estimate includes about $1.7 billion of growth capital expenditures, specifically for the planned restart of Crane, nuclear uprates, behind-the-meter infrastructure, and license renewals [CEG_2024_10-K_0148].\n\nFor fiscal year 2025 (covering planned 2026\u20132027 spending, inclusive of Calpine), the company says its capital expenditure estimate includes about $3.9 billion of growth capital expenditures, specifically for the planned restart of Crane, nuclear uprates, co-location infrastructure, and license renewals [CEG_2025_10-K_0140].\n\nThe excerpts do not break out approximate dollar amounts for each individual initiative (for example, Crane versus uprates versus infrastructure versus license renewals). They only provide the combined growth-capital totals for those initiative groups [CEG_2024_10-K_0148] [CEG_2025_10-K_0140].",
+        "answerable": true,
+        "retry_count": 1,
+        "citations": [
+          {
+            "chunk_id": "CEG_2024_10-K_0148",
+            "company": "Constellation Energy Corporation",
+            "ticker": "CEG",
+            "fiscal_year": 2024,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1868275/000186827525000023/0001868275-25-000023-index.htm"
+          },
+          {
+            "chunk_id": "CEG_2025_10-K_0140",
+            "company": "Constellation Energy Corporation",
+            "ticker": "CEG",
+            "fiscal_year": 2025,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1868275/000186827526000032/0001868275-26-000032-index.htm"
+          }
+        ],
+        "retrieved_chunk_ids": [
+          "CEG_2023_10-K_0158",
+          "CEG_2023_10-K_0125",
+          "CEG_2024_10-K_0148",
+          "CEG_2023_10-K_0124",
+          "CEG_2025_10-K_0140"
+        ],
+        "latency_s": 14.931
+      },
+      "answer_score": {
+        "passed": false,
+        "reason": "The answer omits the required FY2025 major initiative of the Calpine acquisition as a disclosed growth initiative with its approximate ~$22 billion scale, and it does not give the required Crane restart scale of about $1.6 billion. Instead it substitutes aggregate growth-capex totals, so it fails the rubric."
+      },
+      "retrieval_score": {
+        "passed": false,
+        "reason": "The chunks identify the FY2024 growth initiative as the planned restart of Crane and give its overall growth-capex scale (~$1.7B included growth capex). They also identify the FY2025 acquisition of Calpine, but do not provide the approximate dollar scale of that acquisition itself\u2014only post-acquisition capex and a mention of cash consideration used to close, without an amount.",
+        "golden_chunk_id_recall": 0.0
+      },
+      "error": null,
+      "usage": {
+        "agent": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3789,
+            "completion_tokens": 306
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4027,
+            "completion_tokens": 302
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 530,
+            "completion_tokens": 53
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4029,
+            "completion_tokens": 281
+          }
+        ],
+        "judge": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 735,
+            "completion_tokens": 77
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3535,
+            "completion_tokens": 94
+          }
+        ],
+        "rerank_searches": 2
+      },
+      "cost_usd": {
+        "agent": null,
+        "rerank": null,
+        "judge": null,
+        "total": null
+      }
+    },
+    {
+      "id": "q10",
+      "question": "What NuScale power-plant configuration is being deployed for the RoPower project in Romania, and what is its approximate electric output?",
+      "question_type": "multi_chunk_synthesis",
+      "eval_type": "reference",
+      "scoring_mode": "reference",
+      "golden_answer": "A VOYGR-6 plant (six NuScale Power Modules) is being deployed for the RoPower project at the Doicesti Power Station site in Romania, for an approximate gross electric output of ~462 MWe (6 x 77 MWe per module).",
+      "agent": {
+        "answer": "For the RoPower project in Romania, NuScale says the plant configuration is a 6-unit / 6-module design to be deployed at the Doicesti Power Station site. The 2025 filing specifies this as NuScale\u2019s \u201c6-unit 77 MWe NPM design,\u201d and the 2023 filing describes it as a \u201cVOYGR-6 SMR power plant.\u201d [SMR_2025_10-K_0019] [SMR_2023_10-K_0081]\n\nBased on 77 MWe per module and six modules, the approximate electric output is about 462 MWe. This follows directly from the cited 6-unit 77 MWe-per-module design. [SMR_2025_10-K_0019]",
+        "answerable": true,
+        "retry_count": 0,
+        "citations": [
+          {
+            "chunk_id": "SMR_2025_10-K_0019",
+            "company": "NuScale Power Corporation",
+            "ticker": "SMR",
+            "fiscal_year": 2025,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1822966/000182296626000018/0001822966-26-000018-index.htm"
+          },
+          {
+            "chunk_id": "SMR_2023_10-K_0081",
+            "company": "NuScale Power Corporation",
+            "ticker": "SMR",
+            "fiscal_year": 2023,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1822966/000182296624000039/0001822966-24-000039-index.htm"
+          }
+        ],
+        "retrieved_chunk_ids": [
+          "SMR_2025_10-K_0019",
+          "SMR_2024_10-K_0031",
+          "SMR_2024_10-K_0075",
+          "SMR_2023_10-K_0081",
+          "SMR_2023_10-K_0033"
+        ],
+        "latency_s": 7.725
+      },
+      "answer_score": {
+        "passed": true,
+        "reason": "The answer correctly identifies the RoPower configuration as a VOYGR-6 / 6-module NuScale plant at Doicesti and correctly computes the approximate output as 462 MWe (6 \u00d7 77 MWe)."
+      },
+      "retrieval_score": {
+        "passed": true,
+        "reason": "The retrieved chunks state that the RoPower project at Doicesti, Romania will use NuScale\u2019s 6-unit/6-module 77 MWe NPM design, and one chunk explicitly calls it a VOYGR-6 SMR power plant. From six modules at 77 MWe each, the approximate gross electric output is ~462 MWe, so all key facts are present.",
+        "golden_chunk_id_recall": 0.5
+      },
+      "error": null,
+      "usage": {
+        "agent": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3710,
+            "completion_tokens": 207
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3950,
+            "completion_tokens": 209
+          }
+        ],
+        "judge": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 605,
+            "completion_tokens": 61
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3467,
+            "completion_tokens": 94
+          }
+        ],
+        "rerank_searches": 1
+      },
+      "cost_usd": {
+        "agent": null,
+        "rerank": null,
+        "judge": null,
+        "total": null
+      }
+    },
+    {
+      "id": "q11",
+      "question": "How did Cameco's and Centrus Energy's net income compare for fiscal year 2023?",
+      "question_type": "cross_company_comparison",
+      "eval_type": "reference",
+      "scoring_mode": "reference",
+      "golden_answer": "Cameco reported net earnings attributable to equity holders of $361 million CAD for FY2023. Centrus Energy reported net income of $84.4 million USD for FY2023. The figures are in different currencies (CAD vs USD), so they cannot be compared directly without currency conversion; the two companies also differ enormously in scale and business model (Cameco: uranium mining + fuel services + Westinghouse; Centrus: uranium enrichment/HALEU technical services).",
+      "agent": {
+        "answer": "For fiscal year 2023, Cameco reported net earnings attributable to equity holders of $361 million, while Centrus Energy reported net income and comprehensive income of $84.4 million [CCJ_2023_40-F_0352] [LEU_2023_10-K_0136].\n\nSo, Cameco\u2019s 2023 net income was higher than Centrus Energy\u2019s by $276.6 million ($361.0 million minus $84.4 million) [CCJ_2023_40-F_0352] [LEU_2023_10-K_0136].",
+        "answerable": true,
+        "retry_count": 1,
+        "citations": [
+          {
+            "chunk_id": "CCJ_2023_40-F_0352",
+            "company": "Cameco Corporation",
+            "ticker": "CCJ",
+            "fiscal_year": 2023,
+            "form_type": "40-F",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1009001/000119312524075464/0001193125-24-075464-index.htm"
+          },
+          {
+            "chunk_id": "LEU_2023_10-K_0136",
+            "company": "Centrus Energy Corp.",
+            "ticker": "LEU",
+            "fiscal_year": 2023,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1065059/000106505924000013/0001065059-24-000013-index.htm"
+          }
+        ],
+        "retrieved_chunk_ids": [
+          "CCJ_2023_40-F_0352",
+          "CCJ_2023_40-F_0384",
+          "LEU_2023_10-K_0136",
+          "CEG_2025_10-K_0154",
+          "CEG_2023_10-K_0172",
+          "LEU_2024_10-K_0157",
+          "CEG_2024_10-K_0162"
+        ],
+        "latency_s": 10.559
+      },
+      "answer_score": {
+        "passed": false,
+        "reason": "The answer correctly gives Cameco at $361 million and Centrus Energy at $84.4 million for FY2023, but it then directly subtracts them and says Cameco was higher by $276.6 million without addressing that the figures are in different currencies (CAD vs USD). That cross-currency comparison is invalid."
+      },
+      "retrieval_score": {
+        "passed": true,
+        "reason": "The retrieved chunks include Cameco\u2019s FY2023 net earnings attributable to equity holders of 361 million and Centrus Energy\u2019s FY2023 net income of 84.4 million. These are the key facts needed to compare their 2023 net income; the companies\u2019 differing currencies are also evident from the filings/chunk labels and amounts.",
+        "golden_chunk_id_recall": 0.0
+      },
+      "error": null,
+      "usage": {
+        "agent": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 5267,
+            "completion_tokens": 174
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4197,
+            "completion_tokens": 234
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 375,
+            "completion_tokens": 34
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 5507,
+            "completion_tokens": 223
+          }
+        ],
+        "judge": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 608,
+            "completion_tokens": 81
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4984,
+            "completion_tokens": 84
+          }
+        ],
+        "rerank_searches": 2
+      },
+      "cost_usd": {
+        "agent": null,
+        "rerank": null,
+        "judge": null,
+        "total": null
+      }
+    },
+    {
+      "id": "q12",
+      "question": "How does Constellation Energy's disclosed view of nuclear fuel supply risk differ from Cameco's discussion of uranium supply risk, given their different positions in the nuclear fuel supply chain?",
+      "question_type": "cross_company_comparison",
+      "eval_type": "rubric",
+      "scoring_mode": "rubric",
+      "golden_answer": "Constellation Energy (a nuclear utility / fuel buyer) states in its FY2023 10-K that it 'does not anticipate difficulty' obtaining the uranium concentrates, conversion, enrichment, or fabrication services it needs, framing fuel procurement as a manageable, diversified-supplier risk. Cameco (a uranium producer/miner) instead describes deep producer-side geopolitical supply risk in its FY2025 AIF -- citing the Russian invasion of Ukraine, the 2024 Niger mine suspension, Kazakhstan supply-chain challenges, and sanctions/import-export restrictions as factors causing governments and utilities to re-examine sourcing from higher-risk jurisdictions.",
+      "agent": {
+        "answer": "Constellation Energy describes nuclear fuel supply risk from the perspective of a nuclear fleet operator that needs fuel to keep reactors running. Its filings say it obtains fuel through long-term uranium concentrate, conversion, enrichment, and fabrication contracts; maintains inventories in various forms; uses a diverse set of domestic and international suppliers; limits transactions with each supplier to reduce concentration risk; and sizes inventory and forward contractual coverage across multiple years to protect against supply disruptions and near-term price volatility. In 2023 it said it did not anticipate difficulty obtaining the uranium concentrates and related services needed for its fleet, and in 2024 it said it was using \u201call available avenues\u201d and working with the U.S. government and suppliers to ensure long-term continuity of supply [CEG_2023_10-K_0079] [CEG_2024_10-K_0070]. At the same time, Constellation acknowledges procurement risk: nuclear fuel markets are subject to price fluctuations, availability restrictions, counterparty default, and geopolitical risk, including Russia-related sanctions and import bans that can affect Russian nuclear fuel [CEG_2023_10-K_0104] [CEG_2025_10-K_0078].\n\nCameco discusses uranium supply risk from the perspective of an upstream fuel-cycle supplier. It says future uranium and nuclear fuel supply is not keeping pace with rising demand, and attributes heightened supply risk to geopolitical uncertainty, shrinking secondary supplies, and a lack of investment in new capacity over the past decade [CCJ_2023_40-F_0340] [CCJ_2024_40-F_0353] [CCJ_2025_40-F_0348]. Cameco emphasizes that this uncertainty is motivating utilities to re-evaluate near-, mid-, and long-term fuel supply chains and to increase long-term contracting, while competition to secure uranium, conversion, and enrichment under long-term contracts is expected to continue [CCJ_2023_40-F_0340] [CCJ_2024_40-F_0353] [CCJ_2025_40-F_0348]. It further states that geopolitical events, sanctions, insurance cancellations, and transportation issues have shifted risk from producers to utilities [CCJ_2023_40-F_0345], while Cameco portrays itself as a \u201cproven and reliable supplier\u201d with diversified production, market-sourcing options, inventory, storage, and purchase arrangements that position it to benefit from added demand and higher prices [CCJ_2023_40-F_0350].\n\nSo the difference is that Constellation frames nuclear fuel supply risk mainly as a procurement-and-continuity risk to an end-user utility, managed through diversification, inventory, and long-term coverage, whereas Cameco frames uranium supply risk mainly as a structural market shortfall and geopolitical supply uncertainty in the upstream fuel chain that is driving utility contracting demand and benefiting reliable suppliers like Cameco [CEG_2023_10-K_0079] [CEG_2024_10-K_0070] [CEG_2023_10-K_0104] [CEG_2025_10-K_0078] [CCJ_2023_40-F_0340] [CCJ_2024_40-F_0353] [CCJ_2025_40-F_0348] [CCJ_2023_40-F_0345] [CCJ_2023_40-F_0350].",
+        "answerable": true,
+        "retry_count": 1,
+        "citations": [
+          {
+            "chunk_id": "CEG_2023_10-K_0079",
+            "company": "Constellation Energy Corporation",
+            "ticker": "CEG",
+            "fiscal_year": 2023,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1868275/000186827524000014/0001868275-24-000014-index.htm"
+          },
+          {
+            "chunk_id": "CEG_2024_10-K_0070",
+            "company": "Constellation Energy Corporation",
+            "ticker": "CEG",
+            "fiscal_year": 2024,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1868275/000186827525000023/0001868275-25-000023-index.htm"
+          },
+          {
+            "chunk_id": "CEG_2023_10-K_0104",
+            "company": "Constellation Energy Corporation",
+            "ticker": "CEG",
+            "fiscal_year": 2023,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1868275/000186827524000014/0001868275-24-000014-index.htm"
+          },
+          {
+            "chunk_id": "CEG_2025_10-K_0078",
+            "company": "Constellation Energy Corporation",
+            "ticker": "CEG",
+            "fiscal_year": 2025,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1868275/000186827526000032/0001868275-26-000032-index.htm"
+          },
+          {
+            "chunk_id": "CCJ_2023_40-F_0340",
+            "company": "Cameco Corporation",
+            "ticker": "CCJ",
+            "fiscal_year": 2023,
+            "form_type": "40-F",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1009001/000119312524075464/0001193125-24-075464-index.htm"
+          },
+          {
+            "chunk_id": "CCJ_2024_40-F_0353",
+            "company": "Cameco Corporation",
+            "ticker": "CCJ",
+            "fiscal_year": 2024,
+            "form_type": "40-F",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1009001/000119312525060350/0001193125-25-060350-index.htm"
+          },
+          {
+            "chunk_id": "CCJ_2025_40-F_0348",
+            "company": "Cameco Corporation",
+            "ticker": "CCJ",
+            "fiscal_year": 2025,
+            "form_type": "40-F",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1009001/000119312526116229/0001193125-26-116229-index.htm"
+          },
+          {
+            "chunk_id": "CCJ_2023_40-F_0345",
+            "company": "Cameco Corporation",
+            "ticker": "CCJ",
+            "fiscal_year": 2023,
+            "form_type": "40-F",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1009001/000119312524075464/0001193125-24-075464-index.htm"
+          },
+          {
+            "chunk_id": "CCJ_2023_40-F_0350",
+            "company": "Cameco Corporation",
+            "ticker": "CCJ",
+            "fiscal_year": 2023,
+            "form_type": "40-F",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1009001/000119312524075464/0001193125-24-075464-index.htm"
+          }
+        ],
+        "retrieved_chunk_ids": [
+          "CCJ_2024_40-F_0353",
+          "CCJ_2025_40-F_0348",
+          "CCJ_2023_40-F_0340",
+          "CCJ_2023_40-F_0345",
+          "CCJ_2023_40-F_0350",
+          "CEG_2023_10-K_0079",
+          "CEG_2024_10-K_0070",
+          "CEG_2023_10-K_0104",
+          "CEG_2025_10-K_0078"
+        ],
+        "latency_s": 22.295
+      },
+      "answer_score": {
+        "passed": true,
+        "reason": "The answer correctly frames Constellation as a buyer/utility that says it does not anticipate difficulty obtaining needed fuel/services, and Cameco as an upstream producer highlighting geopolitical and structural supply uncertainty. It also explicitly ties the contrast to their opposite positions in the nuclear fuel supply chain, with no reversal or fabrication decisive enough to trigger the fail condition."
+      },
+      "retrieval_score": {
+        "passed": true,
+        "reason": "The chunks contain Cameco\u2019s producer-side discussion of heightened uranium/nuclear fuel supply risk driven by geopolitical uncertainty and underinvestment, and they contain Constellation\u2019s buyer/utility-side statement that it does not anticipate difficulty obtaining uranium concentrates, conversion, enrichment, and fabrication services for its fleet. Together they also make clear the supply-chain-position difference: Constellation is procuring fuel for its fleet, while Cameco is a supplier/producer discussing market supply uncertainty.",
+        "golden_chunk_id_recall": 0.5
+      },
+      "error": null,
+      "usage": {
+        "agent": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 6602,
+            "completion_tokens": 845
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4334,
+            "completion_tokens": 320
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 425,
+            "completion_tokens": 42
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 6842,
+            "completion_tokens": 312
+          }
+        ],
+        "judge": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 1184,
+            "completion_tokens": 83
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 6234,
+            "completion_tokens": 108
+          }
+        ],
+        "rerank_searches": 2
+      },
+      "cost_usd": {
+        "agent": null,
+        "rerank": null,
+        "judge": null,
+        "total": null
+      }
+    },
+    {
+      "id": "q13",
+      "question": "According to Centrus Energy's 10-K, what does the 'Import Ban Act' restrict?",
+      "question_type": "exact_term_keyword",
+      "eval_type": "reference",
+      "scoring_mode": "reference",
+      "golden_answer": "The Import Ban Act bans LEU (low-enriched uranium) imports from Russia into the United States. It is discussed alongside the 'Russian Decree,' which prohibits LEU exports out of Russia absent a license -- both cited as risks given Centrus's reliance on the TENEX Supply Contract as a significant supply source to meet its delivery obligations.",
+      "agent": {
+        "answer": "According to Centrus Energy\u2019s 10-K, the Import Ban Act bans imports of low-enriched uranium (LEU) from Russia into the United States, beginning August 11, 2024, subject to waivers issued by the U.S. Department of Energy (DOE). [LEU_2024_10-K_0101] The 10-K also describes it as banning imports of LEU from Russia into the U.S., subject to DOE waivers. [LEU_2024_10-K_0164]",
+        "answerable": true,
+        "retry_count": 0,
+        "citations": [
+          {
+            "chunk_id": "LEU_2024_10-K_0101",
+            "company": "Centrus Energy Corp.",
+            "ticker": "LEU",
+            "fiscal_year": 2024,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1065059/000106505925000006/0001065059-25-000006-index.htm"
+          },
+          {
+            "chunk_id": "LEU_2024_10-K_0164",
+            "company": "Centrus Energy Corp.",
+            "ticker": "LEU",
+            "fiscal_year": 2024,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1065059/000106505925000006/0001065059-25-000006-index.htm"
+          }
+        ],
+        "retrieved_chunk_ids": [
+          "LEU_2024_10-K_0043",
+          "LEU_2024_10-K_0164",
+          "LEU_2024_10-K_0101",
+          "LEU_2025_10-K_0044",
+          "LEU_2025_10-K_0097"
+        ],
+        "latency_s": 5.557
+      },
+      "answer_score": {
+        "passed": true,
+        "reason": "The answer correctly states that the Import Ban Act restricts/bans imports of low-enriched uranium (LEU) from Russia into the United States, which matches the reference. The added details about the effective date and DOE waivers do not contradict the reference."
+      },
+      "retrieval_score": {
+        "passed": true,
+        "reason": "The retrieved chunks explicitly state that the Import Ban Act bans imports of LEU from Russia into the U.S. They also include the related Russian Decree context and Centrus's reliance on the TENEX Supply Contract, which matches the reference's key facts.",
+        "golden_chunk_id_recall": 0.0
+      },
+      "error": null,
+      "usage": {
+        "agent": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3524,
+            "completion_tokens": 156
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3764,
+            "completion_tokens": 110
+          }
+        ],
+        "judge": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 565,
+            "completion_tokens": 67
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3296,
+            "completion_tokens": 66
+          }
+        ],
+        "rerank_searches": 1
+      },
+      "cost_usd": {
+        "agent": null,
+        "rerank": null,
+        "judge": null,
+        "total": null
+      }
+    },
+    {
+      "id": "q14",
+      "question": "What was Three Mile Island Unit 1 renamed to as part of Constellation Energy's restart plan, and what long-term customer agreement supports the restart?",
+      "question_type": "exact_term_keyword",
+      "eval_type": "reference",
+      "scoring_mode": "reference",
+      "golden_answer": "Three Mile Island Unit 1 was renamed the Crane Clean Energy Center. The restart is supported by a 20-year power purchase agreement (PPA) with Microsoft, under which Microsoft will purchase the plant's output to help power its data centers in PJM with clean energy.",
+      "agent": {
+        "answer": "Three Mile Island Unit 1 was renamed the Crane Clean Energy Center, and the restart is supported by a 20-year power purchase agreement (PPA) with Microsoft under which Microsoft will purchase the output from the renewed plant.[CEG_2024_10-K_0062][CEG_2024_10-K_0117]",
+        "answerable": true,
+        "retry_count": 0,
+        "citations": [
+          {
+            "chunk_id": "CEG_2024_10-K_0062",
+            "company": "Constellation Energy Corporation",
+            "ticker": "CEG",
+            "fiscal_year": 2024,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1868275/000186827525000023/0001868275-25-000023-index.htm"
+          },
+          {
+            "chunk_id": "CEG_2024_10-K_0117",
+            "company": "Constellation Energy Corporation",
+            "ticker": "CEG",
+            "fiscal_year": 2024,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1868275/000186827525000023/0001868275-25-000023-index.htm"
+          }
+        ],
+        "retrieved_chunk_ids": [
+          "CEG_2024_10-K_0062",
+          "CEG_2025_10-K_0054",
+          "CEG_2025_10-K_0108",
+          "CEG_2024_10-K_0117",
+          "CCJ_2024_40-F_0064"
+        ],
+        "latency_s": 5.996
+      },
+      "answer_score": {
+        "passed": true,
+        "reason": "The answer correctly states that Three Mile Island Unit 1 was renamed the Crane Clean Energy Center and that the restart is backed by a 20-year PPA with Microsoft to purchase the plant\u2019s output. These are the key facts asked for and they match the reference."
+      },
+      "retrieval_score": {
+        "passed": true,
+        "reason": "The retrieved chunks explicitly state that Three Mile Island Unit 1 was renamed the Crane Clean Energy Center and that the restart is supported by a 20-year PPA with Microsoft, under which Microsoft will purchase the plant's output to help power its data centers in PJM with clean energy.",
+        "golden_chunk_id_recall": 1.0
+      },
+      "error": null,
+      "usage": {
+        "agent": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4008,
+            "completion_tokens": 116
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4248,
+            "completion_tokens": 237
+          }
+        ],
+        "judge": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 522,
+            "completion_tokens": 68
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3763,
+            "completion_tokens": 72
+          }
+        ],
+        "rerank_searches": 1
+      },
+      "cost_usd": {
+        "agent": null,
+        "rerank": null,
+        "judge": null,
+        "total": null
+      }
+    },
+    {
+      "id": "q15",
+      "question": "How did Cameco's total uranium production (its share) change from fiscal year 2023 to fiscal year 2024?",
+      "question_type": "temporal",
+      "eval_type": "reference",
+      "scoring_mode": "reference",
+      "golden_answer": "Cameco's total uranium production (its share) increased from 17.6 million lbs U3O8 in 2023 to 23.4 million lbs U3O8 in 2024 -- roughly a 33% increase -- driven mainly by a 'record production' year at McArthur River/Key Lake (up from 9.4M lbs to 14.2M lbs due to improved Key Lake mill performance), while Cigar Lake production rose modestly (8.2M lbs to 9.2M lbs).",
+      "agent": {
+        "answer": "Cameco\u2019s total uranium production attributable to its share increased from 17.6 million pounds U3O8 in fiscal 2023 to 23.4 million pounds in fiscal 2024, an increase of 5.8 million pounds, or 33% [CCJ_2024_40-F_0080][CCJ_2024_40-F_0412][CCJ_2023_40-F_0081].",
+        "answerable": true,
+        "retry_count": 0,
+        "citations": [
+          {
+            "chunk_id": "CCJ_2024_40-F_0080",
+            "company": "Cameco Corporation",
+            "ticker": "CCJ",
+            "fiscal_year": 2024,
+            "form_type": "40-F",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1009001/000119312525060350/0001193125-25-060350-index.htm"
+          },
+          {
+            "chunk_id": "CCJ_2024_40-F_0412",
+            "company": "Cameco Corporation",
+            "ticker": "CCJ",
+            "fiscal_year": 2024,
+            "form_type": "40-F",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1009001/000119312525060350/0001193125-25-060350-index.htm"
+          },
+          {
+            "chunk_id": "CCJ_2023_40-F_0081",
+            "company": "Cameco Corporation",
+            "ticker": "CCJ",
+            "fiscal_year": 2023,
+            "form_type": "40-F",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1009001/000119312524075464/0001193125-24-075464-index.htm"
+          }
+        ],
+        "retrieved_chunk_ids": [
+          "CCJ_2024_40-F_0412",
+          "CCJ_2024_40-F_0080",
+          "CCJ_2023_40-F_0081",
+          "CCJ_2024_40-F_0420",
+          "CCJ_2023_40-F_0416"
+        ],
+        "latency_s": 6.928
+      },
+      "answer_score": {
+        "passed": true,
+        "reason": "The answer correctly states Cameco\u2019s share of uranium production rose from 17.6 million lbs U3O8 in 2023 to 23.4 million lbs in 2024, and the derived increase of 5.8 million lbs (about 33%) is arithmetically correct."
+      },
+      "retrieval_score": {
+        "passed": true,
+        "reason": "The retrieved chunks provide Cameco's total uranium production for 2023 and 2024 (17.6M lbs to 23.4M lbs, a 33% increase) and the operation-level changes at McArthur River/Key Lake (9.4M to 14.2M, record production due to improved Key Lake mill performance) and Cigar Lake (8.2M to 9.2M). These cover all key facts needed.",
+        "golden_chunk_id_recall": 1.0
+      },
+      "error": null,
+      "usage": {
+        "agent": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3981,
+            "completion_tokens": 151
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4221,
+            "completion_tokens": 260
+          }
+        ],
+        "judge": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 597,
+            "completion_tokens": 77
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3801,
+            "completion_tokens": 110
+          }
+        ],
+        "rerank_searches": 1
+      },
+      "cost_usd": {
+        "agent": null,
+        "rerank": null,
+        "judge": null,
+        "total": null
+      }
+    },
+    {
+      "id": "q16",
+      "question": "How did Centrus Energy's total revenue change from fiscal year 2023 to fiscal year 2025?",
+      "question_type": "temporal",
+      "eval_type": "reference",
+      "scoring_mode": "reference",
+      "golden_answer": "Centrus Energy's total revenue grew from $320.2 million in FY2023 to $448.7 million in FY2025 -- roughly a 40% increase over two years -- driven by growth in both the LEU segment (separative work units and uranium) and the Technical Solutions segment (HALEU-related contract work).",
+      "agent": {
+        "answer": "Centrus Energy\u2019s total revenue increased from $320.2 million in fiscal 2023 to $448.7 million in fiscal 2025, an increase of $128.5 million, or about 40.1% [(448.7 - 320.2) / 320.2]. [LEU_2025_10-K_0217][LEU_2025_10-K_0216]",
+        "answerable": true,
+        "retry_count": 0,
+        "citations": [
+          {
+            "chunk_id": "LEU_2025_10-K_0217",
+            "company": "Centrus Energy Corp.",
+            "ticker": "LEU",
+            "fiscal_year": 2025,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1065059/000162828026007117/0001628280-26-007117-index.htm"
+          },
+          {
+            "chunk_id": "LEU_2025_10-K_0216",
+            "company": "Centrus Energy Corp.",
+            "ticker": "LEU",
+            "fiscal_year": 2025,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1065059/000162828026007117/0001628280-26-007117-index.htm"
+          }
+        ],
+        "retrieved_chunk_ids": [
+          "LEU_2025_10-K_0111",
+          "LEU_2025_10-K_0217",
+          "LEU_2025_10-K_0216",
+          "CCJ_2024_40-F_0389",
+          "LEU_2025_10-K_0202"
+        ],
+        "latency_s": 5.618
+      },
+      "answer_score": {
+        "passed": true,
+        "reason": "The answer matches the key figures in the reference: revenue rose from $320.2 million in FY2023 to $448.7 million in FY2025. Its derived increase of $128.5 million and about 40.1% is arithmetically correct from those figures."
+      },
+      "retrieval_score": {
+        "passed": true,
+        "reason": "The retrieved chunks contain Centrus Energy\u2019s total revenue for FY2023 ($320.2 million) and FY2025 ($448.7 million), and also show the segment details indicating growth in Technical Solutions and higher SWU revenue within LEU/HALEU-related work. This is sufficient to state the change in total revenue from 2023 to 2025.",
+        "golden_chunk_id_recall": 0.0
+      },
+      "error": null,
+      "usage": {
+        "agent": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4021,
+            "completion_tokens": 135
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4261,
+            "completion_tokens": 228
+          }
+        ],
+        "judge": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 547,
+            "completion_tokens": 74
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3795,
+            "completion_tokens": 90
+          }
+        ],
+        "rerank_searches": 1
+      },
+      "cost_usd": {
+        "agent": null,
+        "rerank": null,
+        "judge": null,
+        "total": null
+      }
+    },
+    {
+      "id": "q17",
+      "question": "How did NuScale Power's net loss change from fiscal year 2023 to fiscal year 2024?",
+      "question_type": "temporal",
+      "eval_type": "reference",
+      "scoring_mode": "reference",
+      "golden_answer": "NuScale's net loss widened from $180.1 million in FY2023 to $348.4 million in FY2024 -- roughly a 93% increase in losses -- despite revenue growing from $22.8 million to $37.0 million over the same period, driven substantially by a large negative swing in the change in fair value of warrant liabilities ($23.6M gain in 2023 vs. a $223.0M loss in 2024).",
+      "agent": {
+        "answer": "NuScale Power\u2019s net loss increased by $168.3 million from fiscal 2023 to fiscal 2024. It went from a net loss of $(180.1) million in 2023 to $(348.4) million in 2024, an increase in loss of $168.272 million [SMR_2024_10-K_0077].",
+        "answerable": true,
+        "retry_count": 0,
+        "citations": [
+          {
+            "chunk_id": "SMR_2024_10-K_0077",
+            "company": "NuScale Power Corporation",
+            "ticker": "SMR",
+            "fiscal_year": 2024,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1822966/000182296625000024/0001822966-25-000024-index.htm"
+          }
+        ],
+        "retrieved_chunk_ids": [
+          "SMR_2024_10-K_0077",
+          "SMR_2024_10-K_0080",
+          "SMR_2025_10-K_0070",
+          "SMR_2024_10-K_0123",
+          "SMR_2025_10-K_0104"
+        ],
+        "latency_s": 6.172
+      },
+      "answer_score": {
+        "passed": true,
+        "reason": "The answer correctly states NuScale's net loss rose from $180.1 million in FY2023 to $348.4 million in FY2024, and the calculated increase of about $168.3 million is arithmetically correct. It directly answers the question with figures matching the reference."
+      },
+      "retrieval_score": {
+        "passed": true,
+        "reason": "The retrieved chunks provide the needed FY2024 and FY2023 net loss figures ($348.387M vs. $180.115M), revenue figures ($37.045M vs. $22.810M), and the key driver in change in fair value of warrant liabilities (a $222.999M loss in 2024 vs. a $23.627M gain in 2023). These facts are sufficient to state that net loss widened by about 93% year over year and explain the main cause.",
+        "golden_chunk_id_recall": 1.0
+      },
+      "error": null,
+      "usage": {
+        "agent": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3815,
+            "completion_tokens": 111
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4055,
+            "completion_tokens": 241
+          }
+        ],
+        "judge": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 561,
+            "completion_tokens": 75
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3614,
+            "completion_tokens": 121
+          }
+        ],
+        "rerank_searches": 1
+      },
+      "cost_usd": {
+        "agent": null,
+        "rerank": null,
+        "judge": null,
+        "total": null
+      }
+    },
+    {
+      "id": "q18",
+      "question": "What percentage of Cameco's revenue in fiscal year 2025 came from solar panel manufacturing?",
+      "question_type": "negative_unanswerable",
+      "eval_type": "reference",
+      "scoring_mode": "negative",
+      "golden_answer": "Not present in corpus. Cameco's disclosed business segments are uranium, fuel services, and its equity-accounted interest in Westinghouse ",
+      "agent": {
+        "answer": "The provided filing excerpts do not contain information showing that Cameco had any revenue from solar panel manufacturing in fiscal year 2025, nor do they provide a solar panel manufacturing revenue figure to use in calculating a percentage. What the excerpts do provide is Cameco\u2019s total 2025 revenue of $3,481,933 (in the table under revenue) and segment/disaggregation categories such as uranium, fuel services, other, and Westinghouse-related presentation [CCJ_2025_40-F_0306] [CCJ_2025_40-F_0332] [CCJ_2025_40-F_0381].",
+        "answerable": false,
+        "retry_count": 2,
+        "citations": [
+          {
+            "chunk_id": "CCJ_2025_40-F_0306",
+            "company": "Cameco Corporation",
+            "ticker": "CCJ",
+            "fiscal_year": 2025,
+            "form_type": "40-F",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1009001/000119312526116229/0001193125-26-116229-index.htm"
+          },
+          {
+            "chunk_id": "CCJ_2025_40-F_0332",
+            "company": "Cameco Corporation",
+            "ticker": "CCJ",
+            "fiscal_year": 2025,
+            "form_type": "40-F",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1009001/000119312526116229/0001193125-26-116229-index.htm"
+          },
+          {
+            "chunk_id": "CCJ_2025_40-F_0381",
+            "company": "Cameco Corporation",
+            "ticker": "CCJ",
+            "fiscal_year": 2025,
+            "form_type": "40-F",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1009001/000119312526116229/0001193125-26-116229-index.htm"
+          }
+        ],
+        "retrieved_chunk_ids": [
+          "CCJ_2025_40-F_0306",
+          "CCJ_2025_40-F_0332",
+          "CCJ_2025_40-F_0381",
+          "CCJ_2025_40-F_0357",
+          "CCJ_2024_40-F_0387",
+          "CCJ_2024_40-F_0340"
+        ],
+        "latency_s": 16.391
+      },
+      "answer_score": {
+        "passed": true,
+        "reason": "Agent declined (answerable=False) as expected."
+      },
+      "retrieval_score": null,
+      "error": null,
+      "usage": {
+        "agent": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4732,
+            "completion_tokens": 189
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4195,
+            "completion_tokens": 177
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 352,
+            "completion_tokens": 42
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4946,
+            "completion_tokens": 210
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 383,
+            "completion_tokens": 51
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4878,
+            "completion_tokens": 202
+          }
+        ],
+        "judge": [],
+        "rerank_searches": 3
+      },
+      "cost_usd": {
+        "agent": null,
+        "rerank": null,
+        "judge": 0.0,
+        "total": null
+      }
+    },
+    {
+      "id": "q19",
+      "question": "Does NuScale Power own or operate any coal-fired power plants?",
+      "question_type": "negative_unanswerable",
+      "eval_type": "reference",
+      "scoring_mode": "negative",
+      "golden_answer": "Not present in corpus. NuScale is a small modular nuclear reactor (SMR) technology company; its filings mention coal only as a comparison/replacement point.",
+      "agent": {
+        "answer": "The provided NuScale Power excerpts do not contain information stating whether NuScale Power owns or operates any coal-fired power plants. They describe NuScale as a holding company whose only material asset is its interest in NuScale LLC and discuss risks related to its small modular reactor business, but they do not answer the coal-plant ownership/operation question for NuScale [SMR_2025_10-K_0015] [SMR_2024_10-K_0016] [SMR_2024_10-K_0017] [SMR_2023_10-K_0016].",
+        "answerable": false,
+        "retry_count": 2,
+        "citations": [
+          {
+            "chunk_id": "SMR_2025_10-K_0015",
+            "company": "NuScale Power Corporation",
+            "ticker": "SMR",
+            "fiscal_year": 2025,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1822966/000182296626000018/0001822966-26-000018-index.htm"
+          },
+          {
+            "chunk_id": "SMR_2024_10-K_0016",
+            "company": "NuScale Power Corporation",
+            "ticker": "SMR",
+            "fiscal_year": 2024,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1822966/000182296625000024/0001822966-25-000024-index.htm"
+          },
+          {
+            "chunk_id": "SMR_2024_10-K_0017",
+            "company": "NuScale Power Corporation",
+            "ticker": "SMR",
+            "fiscal_year": 2024,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1822966/000182296625000024/0001822966-25-000024-index.htm"
+          },
+          {
+            "chunk_id": "SMR_2023_10-K_0016",
+            "company": "NuScale Power Corporation",
+            "ticker": "SMR",
+            "fiscal_year": 2023,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1822966/000182296624000039/0001822966-24-000039-index.htm"
+          }
+        ],
+        "retrieved_chunk_ids": [
+          "SMR_2025_10-K_0015",
+          "SMR_2024_10-K_0016",
+          "SMR_2024_10-K_0017",
+          "CEG_2024_10-K_0076",
+          "SMR_2023_10-K_0016"
+        ],
+        "latency_s": 16.501
+      },
+      "answer_score": {
+        "passed": true,
+        "reason": "Agent declined (answerable=False) as expected."
+      },
+      "retrieval_score": null,
+      "error": null,
+      "usage": {
+        "agent": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3992,
+            "completion_tokens": 193
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 3677,
+            "completion_tokens": 131
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 342,
+            "completion_tokens": 36
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4171,
+            "completion_tokens": 133
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 355,
+            "completion_tokens": 35
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4145,
+            "completion_tokens": 144
+          }
+        ],
+        "judge": [],
+        "rerank_searches": 3
+      },
+      "cost_usd": {
+        "agent": null,
+        "rerank": null,
+        "judge": 0.0,
+        "total": null
+      }
+    },
+    {
+      "id": "q20",
+      "question": "Does Centrus Energy have lithium mining operations?",
+      "question_type": "negative_unanswerable",
+      "eval_type": "reference",
+      "scoring_mode": "negative",
+      "golden_answer": "Not present in corpus. Centrus Energy's disclosed operations are uranium enrichment and the Technical Solutions segment. No lithium mining business is mentioned in the retrieved filings.",
+      "agent": {
+        "answer": "The provided filing excerpts do not contain information that specifically answers whether Centrus Energy has lithium mining operations. The excerpts describe Centrus as supplying nuclear fuel components, providing uranium enrichment and technical services, and operating LEU and Technical Solutions segments focused on uranium, SWU, LEU, and HALEU activities [LEU_2025_10-K_0027] [LEU_2024_10-K_0046] [LEU_2023_10-K_0108] [LEU_2023_10-K_0093] [LEU_2023_10-K_0084].",
+        "answerable": false,
+        "retry_count": 2,
+        "citations": [
+          {
+            "chunk_id": "LEU_2025_10-K_0027",
+            "company": "Centrus Energy Corp.",
+            "ticker": "LEU",
+            "fiscal_year": 2025,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1065059/000162828026007117/0001628280-26-007117-index.htm"
+          },
+          {
+            "chunk_id": "LEU_2024_10-K_0046",
+            "company": "Centrus Energy Corp.",
+            "ticker": "LEU",
+            "fiscal_year": 2024,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1065059/000106505925000006/0001065059-25-000006-index.htm"
+          },
+          {
+            "chunk_id": "LEU_2023_10-K_0108",
+            "company": "Centrus Energy Corp.",
+            "ticker": "LEU",
+            "fiscal_year": 2023,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1065059/000106505924000013/0001065059-24-000013-index.htm"
+          },
+          {
+            "chunk_id": "LEU_2023_10-K_0093",
+            "company": "Centrus Energy Corp.",
+            "ticker": "LEU",
+            "fiscal_year": 2023,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1065059/000106505924000013/0001065059-24-000013-index.htm"
+          },
+          {
+            "chunk_id": "LEU_2023_10-K_0084",
+            "company": "Centrus Energy Corp.",
+            "ticker": "LEU",
+            "fiscal_year": 2023,
+            "form_type": "10-K",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1065059/000106505924000013/0001065059-24-000013-index.htm"
+          }
+        ],
+        "retrieved_chunk_ids": [
+          "LEU_2023_10-K_0093",
+          "LEU_2024_10-K_0046",
+          "LEU_2025_10-K_0027",
+          "LEU_2023_10-K_0108",
+          "LEU_2023_10-K_0084"
+        ],
+        "latency_s": 14.396
+      },
+      "answer_score": {
+        "passed": true,
+        "reason": "Agent declined (answerable=False) as expected."
+      },
+      "retrieval_score": null,
+      "error": null,
+      "usage": {
+        "agent": [
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4089,
+            "completion_tokens": 209
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4091,
+            "completion_tokens": 117
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 320,
+            "completion_tokens": 38
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4246,
+            "completion_tokens": 108
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 327,
+            "completion_tokens": 38
+          },
+          {
+            "model": "gpt-5.4",
+            "prompt_tokens": 4212,
+            "completion_tokens": 149
+          }
+        ],
+        "judge": [],
+        "rerank_searches": 3
+      },
+      "cost_usd": {
+        "agent": null,
+        "rerank": null,
+        "judge": 0.0,
+        "total": null
+      }
+    }
+  ]
+}
