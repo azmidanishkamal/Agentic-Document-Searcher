@@ -1,0 +1,326 @@
+{
+  "n_runs": 3,
+  "config": {
+    "backend": "pinecone",
+    "retrieval_mode": "hybrid_reranked",
+    "judge_model": "gpt-5.4",
+    "agent_model": "gpt-5.4",
+    "grade_model": "gpt-5.4",
+    "max_retries": 2,
+    "top_k": 5,
+    "golden_path": "eval_data/golden_set.jsonl",
+    "golden_sha256": "2cbd9cd909adafccf27d8f855d62978ed40b0ea1d0d940590a8de07a970f5f21",
+    "question_ids": null
+  },
+  "run_ids": [
+    "2026-10-14T10-44-23Z_pinecone_hybrid_reranked",
+    "2026-10-14T10-48-47Z_pinecone_hybrid_reranked",
+    "2026-10-14T10-53-07Z_pinecone_hybrid_reranked"
+  ],
+  "answer_pass_rate": {
+    "min": 0.95,
+    "mean": 0.95,
+    "max": 0.95
+  },
+  "retrieval_pass_rate": {
+    "min": 0.9412,
+    "mean": 0.9412,
+    "max": 0.9412
+  },
+  "unstable_questions": [],
+  "unstable_retrieval_questions": [],
+  "always_failed_questions": [
+    "q09"
+  ],
+  "latency_total_s": {
+    "per_run": [
+      202.744,
+      193.375,
+      202.826
+    ],
+    "mean": 199.648
+  },
+  "tokens": {
+    "agent_prompt": {
+      "per_run": [
+        220293,
+        220250,
+        218461
+      ],
+      "mean": 219668
+    },
+    "agent_completion": {
+      "per_run": [
+        9872,
+        9817,
+        9652
+      ],
+      "mean": 9780.333
+    },
+    "judge_prompt": {
+      "per_run": [
+        76534,
+        74913,
+        75857
+      ],
+      "mean": 75768
+    },
+    "judge_completion": {
+      "per_run": [
+        2492,
+        2374,
+        2405
+      ],
+      "mean": 2423.667
+    },
+    "total": {
+      "per_run": [
+        309191,
+        307354,
+        306375
+      ],
+      "mean": 307640
+    }
+  },
+  "per_run": [
+    {
+      "run_id": "2026-10-14T10-44-23Z_pinecone_hybrid_reranked",
+      "n": 20,
+      "n_errors": 0,
+      "answer_passed": 19,
+      "answer_pass_rate": 0.95,
+      "retrieval_passed": 16,
+      "retrieval_n": 17,
+      "retrieval_pass_rate": 0.9412,
+      "latency_total_s": 202.744,
+      "latency_mean_s": 10.137,
+      "tokens": {
+        "agent_prompt": 220293,
+        "agent_completion": 9872,
+        "judge_prompt": 76534,
+        "judge_completion": 2492,
+        "total": 309191
+      }
+    },
+    {
+      "run_id": "2026-10-14T10-48-47Z_pinecone_hybrid_reranked",
+      "n": 20,
+      "n_errors": 0,
+      "answer_passed": 19,
+      "answer_pass_rate": 0.95,
+      "retrieval_passed": 16,
+      "retrieval_n": 17,
+      "retrieval_pass_rate": 0.9412,
+      "latency_total_s": 193.375,
+      "latency_mean_s": 9.669,
+      "tokens": {
+        "agent_prompt": 220250,
+        "agent_completion": 9817,
+        "judge_prompt": 74913,
+        "judge_completion": 2374,
+        "total": 307354
+      }
+    },
+    {
+      "run_id": "2026-10-14T10-53-07Z_pinecone_hybrid_reranked",
+      "n": 20,
+      "n_errors": 0,
+      "answer_passed": 19,
+      "answer_pass_rate": 0.95,
+      "retrieval_passed": 16,
+      "retrieval_n": 17,
+      "retrieval_pass_rate": 0.9412,
+      "latency_total_s": 202.826,
+      "latency_mean_s": 10.141,
+      "tokens": {
+        "agent_prompt": 218461,
+        "agent_completion": 9652,
+        "judge_prompt": 75857,
+        "judge_completion": 2405,
+        "total": 306375
+      }
+    }
+  ],
+  "per_question": {
+    "q01": {
+      "runs": 3,
+      "answer_passed": 3,
+      "retrieval_runs": 3,
+      "retrieval_passed": 3,
+      "errors": 0,
+      "answer": "3/3",
+      "retrieval": "3/3"
+    },
+    "q02": {
+      "runs": 3,
+      "answer_passed": 3,
+      "retrieval_runs": 3,
+      "retrieval_passed": 3,
+      "errors": 0,
+      "answer": "3/3",
+      "retrieval": "3/3"
+    },
+    "q03": {
+      "runs": 3,
+      "answer_passed": 3,
+      "retrieval_runs": 3,
+      "retrieval_passed": 3,
+      "errors": 0,
+      "answer": "3/3",
+      "retrieval": "3/3"
+    },
+    "q04": {
+      "runs": 3,
+      "answer_passed": 3,
+      "retrieval_runs": 3,
+      "retrieval_passed": 3,
+      "errors": 0,
+      "answer": "3/3",
+      "retrieval": "3/3"
+    },
+    "q05": {
+      "runs": 3,
+      "answer_passed": 3,
+      "retrieval_runs": 3,
+      "retrieval_passed": 3,
+      "errors": 0,
+      "answer": "3/3",
+      "retrieval": "3/3"
+    },
+    "q06": {
+      "runs": 3,
+      "answer_passed": 3,
+      "retrieval_runs": 3,
+      "retrieval_passed": 3,
+      "errors": 0,
+      "answer": "3/3",
+      "retrieval": "3/3"
+    },
+    "q07": {
+      "runs": 3,
+      "answer_passed": 3,
+      "retrieval_runs": 3,
+      "retrieval_passed": 3,
+      "errors": 0,
+      "answer": "3/3",
+      "retrieval": "3/3"
+    },
+    "q08": {
+      "runs": 3,
+      "answer_passed": 3,
+      "retrieval_runs": 3,
+      "retrieval_passed": 3,
+      "errors": 0,
+      "answer": "3/3",
+      "retrieval": "3/3"
+    },
+    "q09": {
+      "runs": 3,
+      "answer_passed": 0,
+      "retrieval_runs": 3,
+      "retrieval_passed": 0,
+      "errors": 0,
+      "answer": "0/3",
+      "retrieval": "0/3"
+    },
+    "q10": {
+      "runs": 3,
+      "answer_passed": 3,
+      "retrieval_runs": 3,
+      "retrieval_passed": 3,
+      "errors": 0,
+      "answer": "3/3",
+      "retrieval": "3/3"
+    },
+    "q11": {
+      "runs": 3,
+      "answer_passed": 3,
+      "retrieval_runs": 3,
+      "retrieval_passed": 3,
+      "errors": 0,
+      "answer": "3/3",
+      "retrieval": "3/3"
+    },
+    "q12": {
+      "runs": 3,
+      "answer_passed": 3,
+      "retrieval_runs": 3,
+      "retrieval_passed": 3,
+      "errors": 0,
+      "answer": "3/3",
+      "retrieval": "3/3"
+    },
+    "q13": {
+      "runs": 3,
+      "answer_passed": 3,
+      "retrieval_runs": 3,
+      "retrieval_passed": 3,
+      "errors": 0,
+      "answer": "3/3",
+      "retrieval": "3/3"
+    },
+    "q14": {
+      "runs": 3,
+      "answer_passed": 3,
+      "retrieval_runs": 3,
+      "retrieval_passed": 3,
+      "errors": 0,
+      "answer": "3/3",
+      "retrieval": "3/3"
+    },
+    "q15": {
+      "runs": 3,
+      "answer_passed": 3,
+      "retrieval_runs": 3,
+      "retrieval_passed": 3,
+      "errors": 0,
+      "answer": "3/3",
+      "retrieval": "3/3"
+    },
+    "q16": {
+      "runs": 3,
+      "answer_passed": 3,
+      "retrieval_runs": 3,
+      "retrieval_passed": 3,
+      "errors": 0,
+      "answer": "3/3",
+      "retrieval": "3/3"
+    },
+    "q17": {
+      "runs": 3,
+      "answer_passed": 3,
+      "retrieval_runs": 3,
+      "retrieval_passed": 3,
+      "errors": 0,
+      "answer": "3/3",
+      "retrieval": "3/3"
+    },
+    "q18": {
+      "runs": 3,
+      "answer_passed": 3,
+      "retrieval_runs": 0,
+      "retrieval_passed": 0,
+      "errors": 0,
+      "answer": "3/3",
+      "retrieval": null
+    },
+    "q19": {
+      "runs": 3,
+      "answer_passed": 3,
+      "retrieval_runs": 0,
+      "retrieval_passed": 0,
+      "errors": 0,
+      "answer": "3/3",
+      "retrieval": null
+    },
+    "q20": {
+      "runs": 3,
+      "answer_passed": 3,
+      "retrieval_runs": 0,
+      "retrieval_passed": 0,
+      "errors": 0,
+      "answer": "3/3",
+      "retrieval": null
+    }
+  }
+}
