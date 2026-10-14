@@ -27,6 +27,7 @@ def _run(
     latency_total: float,
     agent_prompt: int,
     config: dict[str, Any] = _CONFIG,
+    cost_total: float | None = 1.0,
 ) -> dict[str, Any]:
     """Minimal results dict; summary fields are computed the way `summarize` does."""
     answer_passed = sum(q["answer_score"]["passed"] for q in questions)
@@ -51,6 +52,7 @@ def _run(
                 "judge_prompt": 100,
                 "judge_completion": 1,
             },
+            "cost_usd": {"total": cost_total, "complete": cost_total is not None},
         },
         "questions": questions,
     }
@@ -66,6 +68,7 @@ def three_runs() -> list[dict[str, Any]]:
             [_q("q1", True), _q("q2", False), _q("q3", True), _q("q4", True, None)],
             latency_total=40.0,
             agent_prompt=1000,
+            cost_total=1.25,
         ),
         _run(
             "r2",
@@ -77,12 +80,14 @@ def three_runs() -> list[dict[str, Any]]:
             ],
             latency_total=50.0,
             agent_prompt=2000,
+            cost_total=1.5,
         ),
         _run(
             "r3",
             [_q("q1", True), _q("q2", False), _q("q3", True), _q("q4", False, None)],
             latency_total=60.0,
             agent_prompt=3000,
+            cost_total=1.75,
         ),
     ]
 
@@ -130,6 +135,31 @@ def test_latency_and_token_totals(three_runs: list[dict[str, Any]]) -> None:
     }
     assert agg["tokens"]["total"]["per_run"] == [1111, 2111, 3111]
     assert agg["tokens"]["total"]["mean"] == 2111.0
+
+
+def test_cost_per_run_mean_and_total(three_runs: list[dict[str, Any]]) -> None:
+    assert aggregate_runs(three_runs)["cost_usd"] == {
+        "per_run": [1.25, 1.5, 1.75],
+        "mean": 1.5,
+        "total": 4.5,
+        "complete": True,
+    }
+
+
+def test_cost_incomplete_if_any_run_unpriced(
+    three_runs: list[dict[str, Any]],
+) -> None:
+    unpriced = _run(
+        "r4", [_q("q1", True)], latency_total=1.0, agent_prompt=1, cost_total=None
+    )
+    cost = aggregate_runs([three_runs[0], unpriced])["cost_usd"]
+
+    assert cost == {
+        "per_run": [1.25, None],
+        "mean": None,
+        "total": None,
+        "complete": False,
+    }
 
 
 def test_single_run_has_no_unstable_questions(

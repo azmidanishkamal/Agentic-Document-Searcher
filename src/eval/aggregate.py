@@ -51,6 +51,7 @@ def _per_run(run: dict[str, Any]) -> dict[str, Any]:
         "latency_total_s": summary["latency_s"]["total"],
         "latency_mean_s": summary["latency_s"]["mean"],
         "tokens": tokens,
+        "cost_usd": summary["cost_usd"],
     }
 
 
@@ -84,6 +85,18 @@ def _per_question(runs: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
             else None
         )
     return stats
+
+
+def _cost(per_run: list[dict[str, Any]]) -> dict[str, Any]:
+    """Run totals; None (and complete=False) if any run has unpriced usage."""
+    totals = [r["cost_usd"]["total"] for r in per_run]
+    complete = all(t is not None for t in totals)
+    return {
+        "per_run": [None if t is None else round(t, 4) for t in totals],
+        "mean": round(statistics.mean(totals), 4) if complete else None,
+        "total": round(sum(totals), 4) if complete else None,
+        "complete": complete,
+    }
 
 
 def aggregate_runs(runs: list[dict[str, Any]]) -> dict[str, Any]:
@@ -127,6 +140,7 @@ def aggregate_runs(runs: list[dict[str, Any]]) -> dict[str, Any]:
             }
             for name in (*TOKEN_FIELDS, "total")
         },
+        "cost_usd": _cost(per_run),
         "per_run": per_run,
         "per_question": per_question,
     }

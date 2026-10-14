@@ -93,11 +93,11 @@
     },
     "rerank_searches": 30,
     "cost_usd": {
-      "agent": null,
-      "rerank": null,
-      "judge": null,
-      "total": null,
-      "complete": false
+      "agent": 0.6978800000000001,
+      "rerank": 0.060000000000000005,
+      "judge": 0.2228925,
+      "total": 0.9807724999999999,
+      "complete": true
     },
     "mean_retry_count": 0.5
   },
@@ -178,10 +178,10 @@
         "rerank_searches": 1
       },
       "cost_usd": {
-        "agent": null,
-        "rerank": null,
-        "judge": null,
-        "total": null
+        "agent": 0.025357499999999998,
+        "rerank": 0.002,
+        "judge": 0.0121625,
+        "total": 0.03952
       }
     },
     {
@@ -252,10 +252,10 @@
         "rerank_searches": 1
       },
       "cost_usd": {
-        "agent": null,
-        "rerank": null,
-        "judge": null,
-        "total": null
+        "agent": 0.0244575,
+        "rerank": 0.002,
+        "judge": 0.011805,
+        "total": 0.038262500000000005
       }
     },
     {
@@ -334,10 +334,10 @@
         "rerank_searches": 1
       },
       "cost_usd": {
-        "agent": null,
-        "rerank": null,
-        "judge": null,
-        "total": null
+        "agent": 0.024252500000000003,
+        "rerank": 0.002,
+        "judge": 0.0116825,
+        "total": 0.037935
       }
     },
     {
@@ -408,10 +408,10 @@
         "rerank_searches": 1
       },
       "cost_usd": {
-        "agent": null,
-        "rerank": null,
-        "judge": null,
-        "total": null
+        "agent": 0.0228425,
+        "rerank": 0.002,
+        "judge": 0.0112425,
+        "total": 0.036085000000000006
       }
     },
     {
@@ -482,10 +482,10 @@
         "rerank_searches": 1
       },
       "cost_usd": {
-        "agent": null,
-        "rerank": null,
-        "judge": null,
-        "total": null
+        "agent": 0.0223775,
+        "rerank": 0.002,
+        "judge": 0.011442500000000001,
+        "total": 0.035820000000000005
       }
     },
     {
@@ -588,10 +588,10 @@
         "rerank_searches": 1
       },
       "cost_usd": {
-        "agent": null,
-        "rerank": null,
-        "judge": null,
-        "total": null
+        "agent": 0.0247575,
+        "rerank": 0.002,
+        "judge": 0.0115925,
+        "total": 0.03835
       }
     },
     {
@@ -662,10 +662,10 @@
         "rerank_searches": 1
       },
       "cost_usd": {
-        "agent": null,
-        "rerank": null,
-        "judge": null,
-        "total": null
+        "agent": 0.022662500000000002,
+        "rerank": 0.002,
+        "judge": 0.011887499999999999,
+        "total": 0.03655
       }
     },
     {
@@ -736,10 +736,10 @@
         "rerank_searches": 1
       },
       "cost_usd": {
-        "agent": null,
-        "rerank": null,
-        "judge": null,
-        "total": null
+        "agent": 0.0269475,
+        "rerank": 0.002,
+        "judge": 0.013142500000000001,
+        "total": 0.04209
       }
     },
     {
@@ -838,10 +838,10 @@
         "rerank_searches": 3
       },
       "cost_usd": {
-        "agent": null,
-        "rerank": null,
-        "judge": null,
-        "total": null
+        "agent": 0.062125,
+        "rerank": 0.006,
+        "judge": 0.013755,
+        "total": 0.08188000000000001
       }
     },
     {
@@ -920,10 +920,10 @@
         "rerank_searches": 1
       },
       "cost_usd": {
-        "agent": null,
-        "rerank": null,
-        "judge": null,
-        "total": null
+        "agent": 0.025347500000000002,
+        "rerank": 0.002,
+        "judge": 0.0124125,
+        "total": 0.039760000000000004
       }
     },
     {
@@ -1013,10 +1013,10 @@
         "rerank_searches": 2
       },
       "cost_usd": {
-        "agent": null,
-        "rerank": null,
-        "judge": null,
-        "total": null
+        "agent": 0.0448775,
+        "rerank": 0.004,
+        "judge": 0.01453,
+        "total": 0.0634075
       }
     },
     {
@@ -1118,10 +1118,10 @@
         "rerank_searches": 2
       },
       "cost_usd": {
-        "agent": null,
-        "rerank": null,
-        "judge": null,
-        "total": null
+        "agent": 0.07124,
+        "rerank": 0.004,
+        "judge": 0.0226025,
+        "total": 0.0978425
       }
     },
     {
@@ -1200,10 +1200,10 @@
         "rerank_searches": 1
       },
       "cost_usd": {
-        "agent": null,
-        "rerank": null,
-        "judge": null,
-        "total": null
+        "agent": 0.0226475,
+        "rerank": 0.002,
+        "judge": 0.0115575,
+        "total": 0.036205
       }
     },
     {
@@ -1282,10 +1282,10 @@
         "rerank_searches": 1
       },
       "cost_usd": {
-        "agent": null,
-        "rerank": null,
-        "judge": null,
-        "total": null
+        "agent": 0.0266875,
+        "rerank": 0.002,
+        "judge": 0.0127425,
+        "total": 0.041429999999999995
       }
     },
     {
@@ -1372,10 +1372,10 @@
         "rerank_searches": 1
       },
       "cost_usd": {
-        "agent": null,
-        "rerank": null,
-        "judge": null,
-        "total": null
+        "agent": 0.0271225,
+        "rerank": 0.002,
+        "judge": 0.01413,
+        "total": 0.0432525
       }
     },
     {
@@ -1454,10 +1454,10 @@
         "rerank_searches": 1
       },
       "cost_usd": {
-        "agent": null,
-        "rerank": null,
-        "judge": null,
-        "total": null
+        "agent": 0.0260925,
+        "rerank": 0.002,
+        "judge": 0.0130975,
+        "total": 0.04119
       }
     },
     {
@@ -1528,10 +1528,10 @@
         "rerank_searches": 1
       },
       "cost_usd": {
-        "agent": null,
-        "rerank": null,
-        "judge": null,
-        "total": null
+        "agent": 0.025017499999999998,
+        "rerank": 0.002,
+        "judge": 0.0131075,
+        "total": 0.040125
       }
     },
     {
@@ -1618,10 +1618,10 @@
         "rerank_searches": 3
       },
       "cost_usd": {
-        "agent": null,
-        "rerank": null,
+        "agent": 0.0687575,
+        "rerank": 0.006,
         "judge": 0.0,
-        "total": null
+        "total": 0.0747575
       }
     },
     {
@@ -1721,10 +1721,10 @@
         "rerank_searches": 3
       },
       "cost_usd": {
-        "agent": null,
-        "rerank": null,
+        "agent": 0.0520375,
+        "rerank": 0.006,
         "judge": 0.0,
-        "total": null
+        "total": 0.0580375
       }
     },
     {
@@ -1824,10 +1824,10 @@
         "rerank_searches": 3
       },
       "cost_usd": {
-        "agent": null,
-        "rerank": null,
+        "agent": 0.0522725,
+        "rerank": 0.006,
         "judge": 0.0,
-        "total": null
+        "total": 0.0582725
       }
     }
   ]

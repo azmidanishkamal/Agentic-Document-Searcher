@@ -82,6 +82,16 @@
       "mean": 307640
     }
   },
+  "cost_usd": {
+    "per_run": [
+      0.9875,
+      0.9808,
+      0.9767
+    ],
+    "mean": 0.9817,
+    "total": 2.9449,
+    "complete": true
+  },
   "per_run": [
     {
       "run_id": "2026-10-14T10-44-23Z_pinecone_hybrid_reranked",
@@ -100,6 +110,13 @@
         "judge_prompt": 76534,
         "judge_completion": 2492,
         "total": 309191
+      },
+      "cost_usd": {
+        "agent": 0.6988124999999998,
+        "rerank": 0.060000000000000005,
+        "judge": 0.228715,
+        "total": 0.9875275,
+        "complete": true
       }
     },
     {
@@ -119,6 +136,13 @@
         "judge_prompt": 74913,
         "judge_completion": 2374,
         "total": 307354
+      },
+      "cost_usd": {
+        "agent": 0.6978800000000001,
+        "rerank": 0.060000000000000005,
+        "judge": 0.2228925,
+        "total": 0.9807724999999999,
+        "complete": true
       }
     },
     {
@@ -138,6 +162,13 @@
         "judge_prompt": 75857,
         "judge_completion": 2405,
         "total": 306375
+      },
+      "cost_usd": {
+        "agent": 0.6909325,
+        "rerank": 0.060000000000000005,
+        "judge": 0.2257175,
+        "total": 0.97665,
+        "complete": true
       }
     }
   ],

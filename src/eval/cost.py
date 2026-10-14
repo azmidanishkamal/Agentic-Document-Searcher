@@ -23,12 +23,17 @@ class TokenPrice:
     output_per_1m: float
 
 
-# USD. Fill in from official pricing pages; None = unknown.
+# Prices as of 2026-10-14. TODO: confirm against the official OpenAI
+# (https://openai.com/api/pricing) and Cohere (https://cohere.com/pricing)
+# pricing pages before quoting these numbers.
+
+# USD per 1M tokens; None = unknown.
 LLM_PRICES: dict[str, TokenPrice | None] = {
-    "gpt-5.4": None,
+    "gpt-5.4": TokenPrice(input_per_1m=2.50, output_per_1m=15.00),
+    "gpt-5.4-mini": TokenPrice(input_per_1m=0.75, output_per_1m=4.50),
 }
 # USD per Cohere rerank search (one query over <=100 docs).
-RERANK_PRICE_PER_SEARCH: float | None = None
+RERANK_PRICE_PER_SEARCH: float | None = 0.002
 
 
 def llm_cost(
