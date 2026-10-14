@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from src.ingestion.config import REPORTING_CURRENCY
 from src.retrieval.results import RetrievalResult
 
 GRADE_SCHEMA_NAME = "grade_context"
@@ -127,7 +128,12 @@ don't indicate the company does X"), set "answerable" to false.
 - If the excerpts answer only part of the question, answer that part, state \
 clearly what is not covered, and set "answerable" to true.
 - Be precise with numbers, units, periods, and which company/fiscal year a \
-figure belongs to."""
+figure belongs to.
+- Never add, subtract, or compute a ratio or multiple between figures in \
+different currencies or units without an explicit conversion. Instead, state \
+each figure with its currency/unit and say they can't be compared directly. \
+Arithmetic between figures in the same currency and unit (differences, \
+percentage changes, sums) is expected, and the answer should show it."""
 
 UNANSWERABLE_NO_CONTEXT = (
     "The retrieved filings do not contain information to answer this question."
@@ -138,9 +144,11 @@ def format_chunks(chunks: list[RetrievalResult]) -> str:
     blocks = []
     for chunk in chunks:
         filing = chunk.filing
+        currency = REPORTING_CURRENCY.get(filing.ticker, "unknown")
         header = (
             f"[{chunk.id}] {filing.company} ({filing.ticker}) {filing.form_type}, "
-            f"fiscal year {filing.fiscal_year} - {filing.source_url}"
+            f"fiscal year {filing.fiscal_year}, reporting currency {currency} - "
+            f"{filing.source_url}"
         )
         blocks.append(f"{header}\n{chunk.text}")
     return "\n\n---\n\n".join(blocks)

@@ -29,6 +29,15 @@ COMPANIES: list[CompanyConfig] = [
     CompanyConfig(name="Centrus Energy Corp.", ticker="LEU", sector="nuclear_fuel"),
 ]
 
+# Currency each company reports its financial statements in, keyed by ticker.
+# Shown to the agent in excerpt headers so it never compares across currencies.
+REPORTING_CURRENCY: dict[str, str] = {
+    "CCJ": "CAD",
+    "LEU": "USD",
+    "CEG": "USD",
+    "SMR": "USD",
+}
+
 FISCAL_YEARS_BACK = 3
 
 EDGAR_TICKER_MAP_URL = "https://www.sec.gov/files/company_tickers.json"
