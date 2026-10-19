@@ -94,6 +94,11 @@ _FILLER_METADATA = {
 }
 
 
+# Hybrid tests below exercise the uncached list+fetch path; the BM25 cache has
+# its own tests in test_pinecone_bm25_cache.py.
+_NO_CACHE = PineconeConfig(bm25_cache_dir=None)
+
+
 def test_query_hybrid_fuses_dense_and_keyword_legs() -> None:
     dense_match = SimpleNamespace(id="chunk_dense", score=0.9, metadata=_DENSE_ONLY_METADATA)
     fake_index = MagicMock()
@@ -119,7 +124,7 @@ def test_query_hybrid_fuses_dense_and_keyword_legs() -> None:
 
     store = PineconeStore(
         index_config=IndexConfig(),
-        pinecone_config=PineconeConfig(),
+        pinecone_config=_NO_CACHE,
         client=MagicMock(),
         embedder=FakeEmbedder([0.1, 0.2, 0.3]),
     )
@@ -144,7 +149,7 @@ def test_query_hybrid_caches_the_bm25_index_across_calls() -> None:
     )
     store = PineconeStore(
         index_config=IndexConfig(),
-        pinecone_config=PineconeConfig(),
+        pinecone_config=_NO_CACHE,
         client=MagicMock(),
         embedder=FakeEmbedder([0.0]),
     )
@@ -197,7 +202,7 @@ def test_query_hybrid_reranked_widens_the_candidate_pool_then_reranks() -> None:
 
     store = PineconeStore(
         index_config=IndexConfig(),
-        pinecone_config=PineconeConfig(),
+        pinecone_config=_NO_CACHE,
         client=MagicMock(),
         embedder=FakeEmbedder([0.1, 0.2, 0.3]),
         reranker=reranker,
@@ -222,7 +227,7 @@ def test_query_hybrid_reranked_lazily_constructs_a_default_reranker(monkeypatch)
     fake_index.fetch.return_value = SimpleNamespace(vectors={})
     store = PineconeStore(
         index_config=IndexConfig(),
-        pinecone_config=PineconeConfig(),
+        pinecone_config=_NO_CACHE,
         client=MagicMock(),
         embedder=FakeEmbedder([0.0]),
     )

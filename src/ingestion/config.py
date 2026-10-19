@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
+from pathlib import Path
 
 
 @dataclass(frozen=True)
@@ -78,6 +79,9 @@ class IndexConfig:
 class PineconeConfig:
     cloud: str = field(default_factory=lambda: os.environ.get("PINECONE_CLOUD", "aws"))
     region: str = field(default_factory=lambda: os.environ.get("PINECONE_REGION", "us-east-1"))
+    # Local cache of the BM25 corpus (ids + metadata, no embeddings) so hybrid
+    # search doesn't re-download the whole index every run. None disables it.
+    bm25_cache_dir: Path | None = Path(".cache/bm25")
 
 
 @dataclass(frozen=True)

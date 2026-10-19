@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import time
+from pathlib import Path
+from typing import Any
 
 from pinecone import Pinecone, ServerlessSpec
 
@@ -87,13 +90,57 @@ class PineconeStore:
         if self._bm25_index is None:
             if self._index is None:
                 self.ensure_index()
-            documents: list[tuple[str, dict]] = []
-            for page in self._index.list():
-                ids = [item.id for item in page.vectors]
-                fetched = self._index.fetch(ids=ids)
-                documents.extend((id_, vector.metadata) for id_, vector in fetched.vectors.items())
+            cache_dir = self.pinecone_config.bm25_cache_dir
+            if cache_dir is None:
+                documents = self._fetch_bm25_documents()
+            else:
+                documents = self._cached_bm25_documents(cache_dir)
             self._bm25_index = BM25Index.from_metadata(documents)
         return self._bm25_index
+
+    def _fetch_bm25_documents(self) -> list[tuple[str, dict]]:
+        """Scan the whole index (list + fetch). Fetch also returns the
+        embeddings, which is why this is cached locally."""
+        documents: list[tuple[str, dict]] = []
+        for page in self._index.list():
+            ids = [item.id for item in page.vectors]
+            fetched = self._index.fetch(ids=ids)
+            documents.extend((id_, vector.metadata) for id_, vector in fetched.vectors.items())
+        return documents
+
+    def _cached_bm25_documents(self, cache_dir: Path) -> list[tuple[str, dict]]:
+        """BM25 corpus from the local cache, keyed by index name + vector count
+        so re-ingestion (which changes the count) never serves a stale cache."""
+        name = self.index_config.name
+        vector_count = int(self._index.describe_index_stats().total_vector_count)
+        path = cache_dir / f"{name}_{vector_count}.json"
+
+        cached = _read_bm25_cache(path, name, vector_count)
+        if cached is not None:
+            logger.info("Loaded BM25 corpus from %s (%d docs)", path, len(cached))
+            return cached
+
+        documents = self._fetch_bm25_documents()
+        if len(documents) != vector_count:
+            # Stats can lag right after an upsert; don't pin an incomplete corpus.
+            logger.warning(
+                "Fetched %d docs but index reports %d vectors; not caching BM25 corpus",
+                len(documents),
+                vector_count,
+            )
+            return documents
+
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        for stale in cache_dir.glob(f"{name}_*.json"):
+            stale.unlink()
+        payload = {
+            "index": name,
+            "vector_count": vector_count,
+            "documents": [{"id": id_, "metadata": dict(meta)} for id_, meta in documents],
+        }
+        path.write_text(json.dumps(payload), encoding="utf-8")
+        logger.info("Wrote BM25 corpus cache %s (%d docs)", path, len(documents))
+        return documents
 
     def query_hybrid(self, query_text: str, top_k: int = 5) -> list[RetrievalResult]:
         pool = default_candidate_pool_size(top_k)
@@ -117,3 +164,20 @@ class PineconeStore:
         if self._index is not None:
             self._index.close()
         self.client.close()
+
+
+def _read_bm25_cache(
+    path: Path, index_name: str, vector_count: int
+) -> list[tuple[str, dict[str, Any]]] | None:
+    """Cached documents, or None if the file is missing, unreadable, or was
+    written for a different index/count."""
+    if not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if payload["index"] != index_name or payload["vector_count"] != vector_count:
+            return None
+        return [(doc["id"], doc["metadata"]) for doc in payload["documents"]]
+    except (OSError, ValueError, KeyError, TypeError):
+        logger.warning("Ignoring unreadable BM25 cache %s", path)
+        return None
