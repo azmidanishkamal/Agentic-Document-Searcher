@@ -8,7 +8,7 @@ from src.agent.llm import LLMUsage
 from src.eval import cost as cost_mod
 from src.eval.cost import TokenPrice, recost_results
 from src.eval.judge import LLMJudge
-from src.eval.runner import EvalConfig, run_eval
+from src.eval.runner import EvalConfig, run_eval, search_queries
 from tests.eval.conftest import ScriptedLLM, make_chunk, verdict
 
 
@@ -100,6 +100,7 @@ def test_run_eval_end_to_end_with_fakes(golden_file: Path) -> None:
     assert q02["retrieval_score"]["passed"] is True
     assert q02["retrieval_score"]["golden_chunk_id_recall"] == 1.0
     assert q02["agent"]["retry_count"] == 0
+    assert q02["agent"]["search_queries"] == ["Net earnings?"]
     assert q02["usage"]["rerank_searches"] == 1
     assert len(q02["usage"]["agent"]) == 2  # grade + generate
     assert len(q02["usage"]["judge"]) == 2  # answer + retrieval
@@ -169,3 +170,24 @@ def test_partial_prices_leave_cost_incomplete() -> None:
     ]
     assert cost_mod.llm_cost(usage, {"known": TokenPrice(1, 1)}) is None
     assert cost_mod.rerank_cost(0, None) == 0.0
+
+
+def test_search_queries_lists_initial_then_reformulated_queries() -> None:
+    def event(node: str, **detail: Any) -> dict[str, Any]:
+        return {"node": node, "retry_count": 0, "detail": detail}
+
+    result: Any = {
+        "trace": [
+            event("retrieve", query="original question", mode="hybrid"),
+            event("grade", decision="insufficient"),
+            event("reformulate", new_query="retry one"),
+            event("retrieve", query="retry one", mode="hybrid"),
+            event("grade", decision="insufficient"),
+            event("reformulate", new_query="retry two"),
+            event("retrieve", query="retry two", mode="hybrid"),
+            event("grade", decision="sufficient"),
+            event("generate", answerable=True),
+        ]
+    }
+
+    assert search_queries(result) == ["original question", "retry one", "retry two"]

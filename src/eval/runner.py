@@ -73,6 +73,16 @@ def rerank_searches(result: AgentResult) -> int:
     )
 
 
+def search_queries(result: AgentResult) -> list[str]:
+    """Every query the agent searched with, in order: the initial query, then
+    each reformulated one."""
+    return [
+        event["detail"]["query"]
+        for event in result["trace"]
+        if event["node"] == "retrieve"
+    ]
+
+
 def _git_commit() -> str | None:
     try:
         out = subprocess.run(
@@ -131,6 +141,7 @@ def evaluate_question(
             "answer": result["answer"],
             "answerable": result["answerable"],
             "retry_count": result["retry_count"],
+            "search_queries": search_queries(result),
             "citations": result["citations"],
             "retrieved_chunk_ids": [chunk.id for chunk in result["retrieved_chunks"]],
             "latency_s": round(latency, 3),
