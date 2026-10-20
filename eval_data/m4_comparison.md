@@ -66,3 +66,19 @@ Differs on: Retrieval
 | Pinecone dense | PASS | FAIL | **Retrieval:** The retrieved chunks include Cameco's total uranium production volumes for 2023 and 2024 (17.6 million lbs and 23.4 million lbs), which is enough to determine the year-over-year change and approximate 33% increase. However, they do not provide the operation-level breakdown or drivers for 2023 vs. 2024 (e.g., McArthur River/Key Lake 9.4 to 14.2 and Cigar Lake 8.2 to 9.2, improved Key Lake mill performance) needed for the full reference explanation. |
 | Pinecone hybrid_reranked (baseline v2 run 1) | PASS | PASS | **Retrieval:** The retrieved chunks provide Cameco's total uranium production for 2023 and 2024 (17.6M lbs to 23.4M lbs, a 33% increase) and the operation-level breakdown showing McArthur River/Key Lake rising from 9.4M to 14.2M due to record production/improved Key Lake mill performance, while Cigar Lake increased from 8.2M to 9.2M. These facts are sufficient to produce the reference answer. |
 
+
+## Known limitation: q09
+
+q09 asks for Constellation Energy's largest growth initiatives in its FY2024 and FY2025 10-Ks and the approximate dollar scale of each (expected: the Crane Clean Energy Center restart and the Calpine acquisition). It fails the answer check in every config above and in all three baseline v2 runs.
+
+**Cause: multi-hop discovery.** The question doesn't name either initiative, so the agent has to discover what they are before it can look up their size. The first search returns general strategy language and an FY2023 excerpt about "$875 million of growth capital expenditures" (uprates, wind repowering, hydrogen). The retries then search with that excerpt's vocabulary instead of finding the FY2024/FY2025 initiatives. On Weaviate, no excerpt in any run names Calpine or Crane. A typical retry query (Weaviate hybrid_reranked):
+
+> Constellation Energy 2024 10-K "Constellation's Strategy and Outlook" growth capital expenditures nuclear uprates license renewals wind repowering hydrogen sustainable solutions data centers retail load approximate dollar scale 2025 10-K
+
+The agent then correctly declines rather than guessing, but the rubric requires both initiatives, so it fails.
+
+**Attempted fix (reverted).** We gave the reformulate step the retrieved excerpts and told it to search for named items whose requested attribute was missing ("Step A"). On Weaviate hybrid_reranked, q09 still failed 3/3, and the retry queries got worse: they copied the wrong-year excerpt's terms more heavily. q12's retrieval failed in both runs with the change (it passed in the comparison run), and questions that retry cost about 30% more. The change was reverted, so the agent is unchanged.
+
+**Future work.**
+- **Discovery step before lookup:** for questions that ask for unnamed items plus an attribute of each, first run a search to identify the items (e.g. major acquisitions or projects in each requested filing), then search for each named item's attribute separately.
+- **Fiscal-year metadata filtering:** when the question names fiscal years, restrict retrieval (or retry queries) to filings from those years using the `fiscal_year` metadata, so out-of-period excerpts like the FY2023 capex chunk can't take over the search.
