@@ -1,0 +1,86 @@
+name: Live eval
+
+# Manual only: runs real questions against live APIs and costs money
+# (about $0.35 per run with the default questions).
+on:
+  workflow_dispatch:
+    inputs:
+      backend:
+        description: Vector DB backend
+        type: choice
+        options: [weaviate, pinecone]
+        default: weaviate
+      retrieval_mode:
+        description: Retrieval mode (needs eval_data/baselines/ci/<backend>_<mode>.json)
+        type: choice
+        options: [hybrid_reranked, hybrid, dense]
+        default: hybrid_reranked
+      questions:
+        description: Golden question ids, one per question type (q09 excluded)
+        type: string
+        default: q01,q02,q08,q11,q13,q16,q18
+
+permissions:
+  contents: read
+
+# The Cohere trial key allows 10 rerank calls/minute, so live evals never run
+# in parallel: a second trigger waits for the first instead of cancelling it.
+concurrency:
+  group: live-eval
+  cancel-in-progress: false
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    environment: live-eval
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install
+        run: pip install -e .
+
+      # Pinecone hybrid search builds its BM25 corpus by downloading the whole
+      # index unless .cache/bm25 exists. Restore the latest copy; the store
+      # rebuilds it itself if the index's vector count has changed.
+      - name: Restore Pinecone BM25 cache
+        if: inputs.backend == 'pinecone'
+        uses: actions/cache@v4
+        with:
+          path: .cache/bm25
+          key: bm25-pinecone-${{ github.run_id }}
+          restore-keys: bm25-pinecone-
+
+      - name: Run live eval and compare with baseline
+        env:
+          BACKEND: ${{ inputs.backend }}
+          RETRIEVAL_MODE: ${{ inputs.retrieval_mode }}
+          QUESTIONS: ${{ inputs.questions }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+          # Only the chosen backend's credentials are exposed to the run.
+          WEAVIATE_URL: ${{ inputs.backend == 'weaviate' && secrets.WEAVIATE_URL || '' }}
+          WEAVIATE_API_KEY: ${{ inputs.backend == 'weaviate' && secrets.WEAVIATE_API_KEY || '' }}
+          PINECONE_API_KEY: ${{ inputs.backend == 'pinecone' && secrets.PINECONE_API_KEY || '' }}
+          # Optional; unset falls back to the code default (gpt-5.4).
+          AGENT_LLM_MODEL: ${{ vars.AGENT_LLM_MODEL }}
+        run: >-
+          python -m src.eval.regression
+          --backend "$BACKEND"
+          --retrieval-mode "$RETRIEVAL_MODE"
+          --questions "$QUESTIONS"
+          --out-dir eval_results/regression
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-eval-${{ inputs.backend }}-${{ inputs.retrieval_mode }}-${{ github.run_id }}
+          path: eval_results/regression
+          if-no-files-found: ignore
