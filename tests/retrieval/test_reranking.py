@@ -1,6 +1,8 @@
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
+import pytest
+
 from src.ingestion.models import FilingMetadata
 from src.retrieval.reranking import DEFAULT_COHERE_RERANK_MODEL, CohereReranker
 from src.retrieval.results import RetrievalResult
@@ -88,3 +90,84 @@ def test_rerank_preserves_other_result_fields() -> None:
     assert reranked[0].filing == _FILING
     assert reranked[0].chunk_index == 0
     assert reranked[0].total_chunks == 1
+
+
+class _RateLimited(Exception):
+    def __init__(self, headers: dict[str, str] | None = None) -> None:
+        super().__init__("429")
+        self.status_code = 429
+        self.headers = headers or {}
+
+
+def _ok_response() -> SimpleNamespace:
+    return SimpleNamespace(results=[SimpleNamespace(index=0, relevance_score=0.9)])
+
+
+def test_rerank_retries_rate_limits_with_exponential_backoff() -> None:
+    fake_client = MagicMock()
+    fake_client.rerank.side_effect = [_RateLimited(), _RateLimited(), _ok_response()]
+    sleeps: list[float] = []
+    reranker = CohereReranker(client=fake_client, sleep=sleeps.append)
+
+    reranked = reranker.rerank("query", [_result("a", "text a", 0.1)], top_k=1)
+
+    assert [r.id for r in reranked] == ["a"]
+    assert fake_client.rerank.call_count == 3
+    assert sleeps == [5.0, 10.0]
+
+
+def test_rerank_backoff_honors_retry_after_up_to_the_cap() -> None:
+    fake_client = MagicMock()
+    fake_client.rerank.side_effect = [
+        _RateLimited({"Retry-After": "7"}),
+        _RateLimited({"retry-after": "600"}),
+        _ok_response(),
+    ]
+    sleeps: list[float] = []
+    reranker = CohereReranker(client=fake_client, sleep=sleeps.append)
+
+    reranker.rerank("query", [_result("a", "text a", 0.1)], top_k=1)
+
+    assert sleeps == [7.0, 60.0]
+
+
+def test_rerank_gives_up_after_max_attempts() -> None:
+    fake_client = MagicMock()
+    fake_client.rerank.side_effect = _RateLimited()
+    sleeps: list[float] = []
+    reranker = CohereReranker(client=fake_client, max_attempts=3, sleep=sleeps.append)
+
+    with pytest.raises(_RateLimited):
+        reranker.rerank("query", [_result("a", "text a", 0.1)], top_k=1)
+
+    assert fake_client.rerank.call_count == 3
+    assert sleeps == [5.0, 10.0]
+
+
+def test_rerank_does_not_retry_other_errors() -> None:
+    fake_client = MagicMock()
+    fake_client.rerank.side_effect = ValueError("bad request")
+    sleeps: list[float] = []
+    reranker = CohereReranker(client=fake_client, sleep=sleeps.append)
+
+    with pytest.raises(ValueError):
+        reranker.rerank("query", [_result("a", "text a", 0.1)], top_k=1)
+
+    assert fake_client.rerank.call_count == 1
+    assert sleeps == []
+
+
+def test_rerank_recognizes_cohere_too_many_requests_error() -> None:
+    from cohere.errors import TooManyRequestsError
+
+    fake_client = MagicMock()
+    fake_client.rerank.side_effect = [
+        TooManyRequestsError(body={"message": "trial key"}, headers={}),
+        _ok_response(),
+    ]
+    sleeps: list[float] = []
+    reranker = CohereReranker(client=fake_client, sleep=sleeps.append)
+
+    reranker.rerank("query", [_result("a", "text a", 0.1)], top_k=1)
+
+    assert sleeps == [5.0]
