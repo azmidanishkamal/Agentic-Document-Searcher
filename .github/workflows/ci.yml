@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Minimum supported version (requires-python) and the one used locally.
+        python-version: ["3.11", "3.14"]
+    # No API keys: unit tests must not reach any live service.
+    env:
+      BLOCK_NETWORK: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install
+        run: pip install -e ".[dev]"
+
+      - name: Ruff check
+        run: ruff check .
+
+      - name: Ruff format check
+        run: ruff format --check .
+
+      # tiktoken downloads its encoding file on first use. Fetch it here,
+      # outside pytest, so the tests themselves run without network access.
+      - name: Set tiktoken cache dir
+        run: echo "TIKTOKEN_CACHE_DIR=$RUNNER_TEMP/tiktoken" >> "$GITHUB_ENV"
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ env.TIKTOKEN_CACHE_DIR }}
+          key: tiktoken-${{ hashFiles('src/ingestion/config.py') }}
+
+      - name: Prefetch tiktoken encoding
+        run: >-
+          python -c "import tiktoken;
+          from src.ingestion.config import ChunkingConfig;
+          tiktoken.get_encoding(ChunkingConfig().encoding_name)"
+
+      - name: Pytest
+        run: python -m pytest -q

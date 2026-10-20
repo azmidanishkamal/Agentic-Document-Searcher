@@ -23,7 +23,8 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest",
-    "ruff",
+    # Pinned so CI's `ruff format --check` matches local formatting.
+    "ruff==0.16.7",
 ]
 
 [build-system]
