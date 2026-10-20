@@ -35,6 +35,18 @@ with a golden Q&A dataset, wired into CI.
 Standard Python conventions, type hints everywhere, ruff for linting/formatting,
 pytest for testing.
 
+## Workflow rules
+
+- `main` is protected: never push to it directly. Make changes on a new
+  branch, push the branch, and open a pull request with `gh pr create`. The
+  maintainer merges it once CI passes.
+- Run live eval jobs one at a time, never in parallel: the Cohere trial key
+  allows 10 calls per minute.
+- Pinecone is on the free tier with a 1 GB monthly egress limit. Avoid
+  unnecessary Pinecone reads, and prefer dense mode for live checks.
+- Don't commit files from `eval_results/`; baselines go in
+  `eval_data/baselines/` deliberately.
+
 ## Current milestone
 
 M1 — ingestion pipeline (not yet started).
