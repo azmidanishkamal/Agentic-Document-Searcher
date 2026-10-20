@@ -31,12 +31,15 @@ _RELEVANT_TEXTS = [
 
 
 def _metadata_docs(texts: list[str]) -> list[tuple[str, dict]]:
-    return [(f"doc{i}", {**_BASE_METADATA, "text": text}) for i, text in enumerate(texts)]
+    return [
+        (f"doc{i}", {**_BASE_METADATA, "text": text}) for i, text in enumerate(texts)
+    ]
 
 
 def test_bm25_index_ranks_keyword_matches_above_unrelated_text() -> None:
     documents = _metadata_docs(_FILLER_TEXTS) + [
-        (f"relevant{i}", {**_BASE_METADATA, "text": text}) for i, text in enumerate(_RELEVANT_TEXTS)
+        (f"relevant{i}", {**_BASE_METADATA, "text": text})
+        for i, text in enumerate(_RELEVANT_TEXTS)
     ]
     index = BM25Index.from_metadata(documents)
 
@@ -56,7 +59,8 @@ def test_bm25_index_search_on_empty_index_returns_empty_list() -> None:
 
 def test_bm25_index_respects_top_k_and_ranks_by_relevance() -> None:
     documents = _metadata_docs(_FILLER_TEXTS) + [
-        (f"relevant{i}", {**_BASE_METADATA, "text": text}) for i, text in enumerate(_RELEVANT_TEXTS)
+        (f"relevant{i}", {**_BASE_METADATA, "text": text})
+        for i, text in enumerate(_RELEVANT_TEXTS)
     ]
     index = BM25Index.from_metadata(documents)
 

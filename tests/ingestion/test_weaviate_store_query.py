@@ -54,7 +54,9 @@ def test_query_embeds_text_and_maps_objects_to_results() -> None:
     results = store.query("What drove revenue growth?", top_k=2)
 
     assert embedder.embedded_texts == ["What drove revenue growth?"]
-    fake_client.collections.get.assert_called_once_with(WeaviateConfig().collection_name)
+    fake_client.collections.get.assert_called_once_with(
+        WeaviateConfig().collection_name
+    )
     _, kwargs = fake_collection.query.near_vector.call_args
     assert kwargs["near_vector"] == [0.4, 0.5]
     assert kwargs["limit"] == 2
@@ -87,7 +89,10 @@ def test_query_defaults_top_k_to_five() -> None:
     assert fake_collection.query.near_vector.call_args.kwargs["limit"] == 5
 
 
-_DENSE_ONLY_METADATA = {**_METADATA, "text": "Revenue increased due to higher electricity demand."}
+_DENSE_ONLY_METADATA = {
+    **_METADATA,
+    "text": "Revenue increased due to higher electricity demand.",
+}
 _KEYWORD_ONLY_METADATA = {
     **_METADATA,
     "text": "Mine suspension in Niger disrupted uranium supply in 2024.",
@@ -96,13 +101,19 @@ _KEYWORD_ONLY_METADATA = {
 
 def test_query_hybrid_fuses_dense_and_bm25_legs() -> None:
     dense_obj = SimpleNamespace(
-        uuid="dense-uuid", properties=_DENSE_ONLY_METADATA, metadata=SimpleNamespace(distance=0.1)
+        uuid="dense-uuid",
+        properties=_DENSE_ONLY_METADATA,
+        metadata=SimpleNamespace(distance=0.1),
     )
     bm25_obj = SimpleNamespace(
-        uuid="keyword-uuid", properties=_KEYWORD_ONLY_METADATA, metadata=SimpleNamespace(score=5.0)
+        uuid="keyword-uuid",
+        properties=_KEYWORD_ONLY_METADATA,
+        metadata=SimpleNamespace(score=5.0),
     )
     fake_collection = MagicMock()
-    fake_collection.query.near_vector.return_value = SimpleNamespace(objects=[dense_obj])
+    fake_collection.query.near_vector.return_value = SimpleNamespace(
+        objects=[dense_obj]
+    )
     fake_collection.query.bm25.return_value = SimpleNamespace(objects=[bm25_obj])
     fake_client = MagicMock()
     fake_client.collections.get.return_value = fake_collection
@@ -159,13 +170,19 @@ class FakeReranker:
 
 def test_query_hybrid_reranked_widens_the_candidate_pool_then_reranks() -> None:
     dense_obj = SimpleNamespace(
-        uuid="dense-uuid", properties=_DENSE_ONLY_METADATA, metadata=SimpleNamespace(distance=0.1)
+        uuid="dense-uuid",
+        properties=_DENSE_ONLY_METADATA,
+        metadata=SimpleNamespace(distance=0.1),
     )
     bm25_obj = SimpleNamespace(
-        uuid="keyword-uuid", properties=_KEYWORD_ONLY_METADATA, metadata=SimpleNamespace(score=5.0)
+        uuid="keyword-uuid",
+        properties=_KEYWORD_ONLY_METADATA,
+        metadata=SimpleNamespace(score=5.0),
     )
     fake_collection = MagicMock()
-    fake_collection.query.near_vector.return_value = SimpleNamespace(objects=[dense_obj])
+    fake_collection.query.near_vector.return_value = SimpleNamespace(
+        objects=[dense_obj]
+    )
     fake_collection.query.bm25.return_value = SimpleNamespace(objects=[bm25_obj])
     fake_client = MagicMock()
     fake_client.collections.get.return_value = fake_collection
@@ -190,7 +207,9 @@ def test_query_hybrid_reranked_widens_the_candidate_pool_then_reranks() -> None:
     assert {c.id for c in candidates} == {"dense-uuid", "keyword-uuid"}
 
 
-def test_query_hybrid_reranked_lazily_constructs_a_default_reranker(monkeypatch) -> None:
+def test_query_hybrid_reranked_lazily_constructs_a_default_reranker(
+    monkeypatch,
+) -> None:
     fake_collection = MagicMock()
     fake_collection.query.near_vector.return_value = SimpleNamespace(objects=[])
     fake_collection.query.bm25.return_value = SimpleNamespace(objects=[])

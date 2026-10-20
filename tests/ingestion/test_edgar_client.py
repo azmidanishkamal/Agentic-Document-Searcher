@@ -24,15 +24,29 @@ def test_filing_ref_document_url() -> None:
     )
 
 
-def test_list_annual_filings_filters_by_form_and_year(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_list_annual_filings_filters_by_form_and_year(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     current_year = date.today().year
     submissions = {
         "filings": {
             "recent": {
                 "form": ["10-K", "8-K", "10-K"],
-                "reportDate": [f"{current_year - 1}-12-31", "", f"{current_year - 10}-12-31"],
-                "filingDate": [f"{current_year}-02-01", f"{current_year}-01-15", f"{current_year - 10}-02-01"],
-                "accessionNumber": ["0001-24-000001", "0001-24-000002", "0001-14-000003"],
+                "reportDate": [
+                    f"{current_year - 1}-12-31",
+                    "",
+                    f"{current_year - 10}-12-31",
+                ],
+                "filingDate": [
+                    f"{current_year}-02-01",
+                    f"{current_year}-01-15",
+                    f"{current_year - 10}-02-01",
+                ],
+                "accessionNumber": [
+                    "0001-24-000001",
+                    "0001-24-000002",
+                    "0001-14-000003",
+                ],
                 "primaryDocument": ["a.htm", "b.htm", "c.htm"],
             }
         }
@@ -64,7 +78,10 @@ def test_get_filing_documents_includes_large_exhibits_and_skips_boilerplate(
             "item": [
                 {"name": "d34605d40f.htm", "size": "609286"},
                 {"name": "d34605dex991.htm", "size": "1797756"},  # AIF, large exhibit
-                {"name": "d34605dex994.htm", "size": "5551"},  # small boilerplate exhibit
+                {
+                    "name": "d34605dex994.htm",
+                    "size": "5551",
+                },  # small boilerplate exhibit
                 {"name": "R1.htm", "size": "500000"},  # XBRL viewer fragment
                 {"name": "d34605d40f_htm.xml", "size": "3235354"},  # not html
             ]

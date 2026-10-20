@@ -103,7 +103,9 @@ class WeaviateStore:
             # Collection distance is cosine distance (1 - cosine similarity),
             # so flip it to a similarity score comparable with Pinecone's.
             result_from_metadata(
-                id_=str(obj.uuid), score=1.0 - obj.metadata.distance, metadata=obj.properties
+                id_=str(obj.uuid),
+                score=1.0 - obj.metadata.distance,
+                metadata=obj.properties,
             )
             for obj in response.objects
         ]
@@ -120,7 +122,9 @@ class WeaviateStore:
             return_metadata=wvc_query.MetadataQuery(score=True),
         )
         sparse_results = [
-            result_from_metadata(id_=str(obj.uuid), score=obj.metadata.score, metadata=obj.properties)
+            result_from_metadata(
+                id_=str(obj.uuid), score=obj.metadata.score, metadata=obj.properties
+            )
             for obj in bm25_response.objects
         ]
 

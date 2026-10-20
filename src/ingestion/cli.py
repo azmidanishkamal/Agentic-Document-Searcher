@@ -14,7 +14,9 @@ logger = logging.getLogger(__name__)
 
 
 def _parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Ingest SEC 10-K/40-F filings into vector stores.")
+    parser = argparse.ArgumentParser(
+        description="Ingest SEC 10-K/40-F filings into vector stores."
+    )
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -30,7 +32,9 @@ def _parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s"
+    )
     load_dotenv()
     args = _parse_args()
 

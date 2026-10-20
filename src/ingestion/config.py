@@ -19,14 +19,18 @@ class CompanyConfig:
 
 
 COMPANIES: list[CompanyConfig] = [
-    CompanyConfig(name="Constellation Energy Corporation", ticker="CEG", sector="utilities"),
+    CompanyConfig(
+        name="Constellation Energy Corporation", ticker="CEG", sector="utilities"
+    ),
     CompanyConfig(
         name="Cameco Corporation",
         ticker="CCJ",
         sector="nuclear_fuel",
         form_types=("40-F",),  # Canadian foreign private issuer, no 10-K
     ),
-    CompanyConfig(name="NuScale Power Corporation", ticker="SMR", sector="nuclear_tech"),
+    CompanyConfig(
+        name="NuScale Power Corporation", ticker="SMR", sector="nuclear_tech"
+    ),
     CompanyConfig(name="Centrus Energy Corp.", ticker="LEU", sector="nuclear_fuel"),
 ]
 
@@ -78,7 +82,9 @@ class IndexConfig:
 @dataclass(frozen=True)
 class PineconeConfig:
     cloud: str = field(default_factory=lambda: os.environ.get("PINECONE_CLOUD", "aws"))
-    region: str = field(default_factory=lambda: os.environ.get("PINECONE_REGION", "us-east-1"))
+    region: str = field(
+        default_factory=lambda: os.environ.get("PINECONE_REGION", "us-east-1")
+    )
     # Local cache of the BM25 corpus (ids + metadata, no embeddings) so hybrid
     # search doesn't re-download the whole index every run. None disables it.
     bm25_cache_dir: Path | None = Path(".cache/bm25")

@@ -6,7 +6,9 @@ from src.ingestion.config import ChunkingConfig
 
 def test_chunk_text_respects_token_budget_and_overlap() -> None:
     config = ChunkingConfig(chunk_size_tokens=50, chunk_overlap_tokens=10)
-    paragraph = "The quarterly revenue increased due to higher electricity demand. " * 40
+    paragraph = (
+        "The quarterly revenue increased due to higher electricity demand. " * 40
+    )
     chunks = chunk_text(paragraph, config)
 
     assert len(chunks) > 1

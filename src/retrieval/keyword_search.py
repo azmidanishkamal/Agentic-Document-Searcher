@@ -31,7 +31,9 @@ class BM25Index:
         )
 
     @classmethod
-    def from_metadata(cls, documents: Iterable[tuple[str, Mapping[str, Any]]]) -> BM25Index:
+    def from_metadata(
+        cls, documents: Iterable[tuple[str, Mapping[str, Any]]]
+    ) -> BM25Index:
         ids: list[str] = []
         metadatas: list[Mapping[str, Any]] = []
         for id_, metadata in documents:
@@ -44,9 +46,13 @@ class BM25Index:
             return []
 
         scores = self._bm25.get_scores(_tokenize(query_text))
-        ranked_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:top_k]
+        ranked_indices = sorted(
+            range(len(scores)), key=lambda i: scores[i], reverse=True
+        )[:top_k]
         return [
-            result_from_metadata(id_=self._ids[i], score=float(scores[i]), metadata=self._metadatas[i])
+            result_from_metadata(
+                id_=self._ids[i], score=float(scores[i]), metadata=self._metadatas[i]
+            )
             for i in ranked_indices
             if scores[i] > 0
         ]

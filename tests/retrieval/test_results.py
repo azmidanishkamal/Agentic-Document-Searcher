@@ -17,7 +17,9 @@ _METADATA = {
 
 
 def test_result_from_metadata_builds_filing_and_result() -> None:
-    result = result_from_metadata(id_="CEG_2023_10-K_0004", score=0.87, metadata=_METADATA)
+    result = result_from_metadata(
+        id_="CEG_2023_10-K_0004", score=0.87, metadata=_METADATA
+    )
 
     assert result == RetrievalResult(
         id="CEG_2023_10-K_0004",
@@ -41,7 +43,12 @@ def test_result_from_metadata_builds_filing_and_result() -> None:
 def test_result_from_metadata_coerces_numeric_fields() -> None:
     # Some backends round-trip numbers as floats/strings; coercion should
     # still land on the right int types.
-    metadata = {**_METADATA, "fiscal_year": 2023.0, "chunk_index": "4", "total_chunks": 12.0}
+    metadata = {
+        **_METADATA,
+        "fiscal_year": 2023.0,
+        "chunk_index": "4",
+        "total_chunks": 12.0,
+    }
 
     result = result_from_metadata(id_="x", score=0.5, metadata=metadata)
 

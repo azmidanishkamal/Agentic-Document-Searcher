@@ -39,7 +39,8 @@ def _build_chunks(
 ) -> list[Chunk]:
     document_names = edgar_client.get_filing_documents(filing)
     text = "\n\n".join(
-        html_to_text(edgar_client.download_document(filing, name)) for name in document_names
+        html_to_text(edgar_client.download_document(filing, name))
+        for name in document_names
     )
     pieces = chunk_text(text, chunking_config)
 
@@ -96,7 +97,11 @@ def run_ingestion(
                 summary.filings_processed += 1
                 summary.chunks_created += len(chunks)
                 logger.info(
-                    "%s FY%d %s: %d chunks", company.ticker, filing.fiscal_year, filing.form_type, len(chunks)
+                    "%s FY%d %s: %d chunks",
+                    company.ticker,
+                    filing.fiscal_year,
+                    filing.form_type,
+                    len(chunks),
                 )
 
                 if dry_run:
@@ -126,7 +131,11 @@ def run_ingestion(
             try:
                 store.close()
             except Exception:
-                logger.warning("Failed to close vector store %s", type(store).__name__, exc_info=True)
+                logger.warning(
+                    "Failed to close vector store %s",
+                    type(store).__name__,
+                    exc_info=True,
+                )
 
 
 def default_stores() -> list[VectorStore]:

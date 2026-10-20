@@ -23,7 +23,9 @@ class RetrievalResult:
     total_chunks: int
 
 
-def result_from_metadata(id_: str, score: float, metadata: Mapping[str, Any]) -> RetrievalResult:
+def result_from_metadata(
+    id_: str, score: float, metadata: Mapping[str, Any]
+) -> RetrievalResult:
     """Rebuild a `RetrievalResult` from the flat metadata dict produced by
     `Chunk.to_metadata_dict`, as stored by either backend."""
     filing = FilingMetadata(

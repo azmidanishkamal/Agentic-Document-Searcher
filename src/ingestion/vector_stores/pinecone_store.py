@@ -57,7 +57,9 @@ class PineconeStore:
                     cloud=self.pinecone_config.cloud, region=self.pinecone_config.region
                 ),
             )
-            while not self.client.describe_index(self.index_config.name).status["ready"]:
+            while not self.client.describe_index(self.index_config.name).status[
+                "ready"
+            ]:
                 time.sleep(1)
         self._index = self.client.Index(self.index_config.name)
 
@@ -66,7 +68,11 @@ class PineconeStore:
             self.ensure_index()
 
         vectors = [
-            {"id": chunk.chunk_id, "values": chunk.embedding, "metadata": chunk.to_metadata_dict()}
+            {
+                "id": chunk.chunk_id,
+                "values": chunk.embedding,
+                "metadata": chunk.to_metadata_dict(),
+            }
             for chunk in chunks
         ]
         for start in range(0, len(vectors), _UPSERT_BATCH_SIZE):
@@ -82,7 +88,9 @@ class PineconeStore:
         vector = embed_query(self.embedder, query_text)
         response = self._index.query(vector=vector, top_k=top_k, include_metadata=True)
         return [
-            result_from_metadata(id_=match.id, score=match.score, metadata=match.metadata)
+            result_from_metadata(
+                id_=match.id, score=match.score, metadata=match.metadata
+            )
             for match in response.matches
         ]
 
@@ -105,7 +113,9 @@ class PineconeStore:
         for page in self._index.list():
             ids = [item.id for item in page.vectors]
             fetched = self._index.fetch(ids=ids)
-            documents.extend((id_, vector.metadata) for id_, vector in fetched.vectors.items())
+            documents.extend(
+                (id_, vector.metadata) for id_, vector in fetched.vectors.items()
+            )
         return documents
 
     def _cached_bm25_documents(self, cache_dir: Path) -> list[tuple[str, dict]]:
@@ -136,7 +146,9 @@ class PineconeStore:
         payload = {
             "index": name,
             "vector_count": vector_count,
-            "documents": [{"id": id_, "metadata": dict(meta)} for id_, meta in documents],
+            "documents": [
+                {"id": id_, "metadata": dict(meta)} for id_, meta in documents
+            ],
         }
         path.write_text(json.dumps(payload), encoding="utf-8")
         logger.info("Wrote BM25 corpus cache %s (%d docs)", path, len(documents))

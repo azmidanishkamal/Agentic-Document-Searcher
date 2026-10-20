@@ -18,7 +18,9 @@ _FILING = FilingMetadata(
 
 
 def _result(id_: str, text: str, score: float) -> RetrievalResult:
-    return RetrievalResult(id=id_, text=text, score=score, filing=_FILING, chunk_index=0, total_chunks=1)
+    return RetrievalResult(
+        id=id_, text=text, score=score, filing=_FILING, chunk_index=0, total_chunks=1
+    )
 
 
 def test_rerank_reorders_candidates_by_cohere_relevance_score() -> None:

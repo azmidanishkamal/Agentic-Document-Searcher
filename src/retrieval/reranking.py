@@ -47,7 +47,11 @@ class CohereReranker:
     """Reranks candidates by sending the query + candidate texts to Cohere's
     rerank endpoint and reordering to `top_k` by relevance score."""
 
-    def __init__(self, client: RerankClient | None = None, model: str = DEFAULT_COHERE_RERANK_MODEL) -> None:
+    def __init__(
+        self,
+        client: RerankClient | None = None,
+        model: str = DEFAULT_COHERE_RERANK_MODEL,
+    ) -> None:
         self.client = client or _default_client()
         self.model = model
 

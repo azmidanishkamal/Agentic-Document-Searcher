@@ -49,7 +49,9 @@ def test_query_embeds_text_and_maps_matches_to_results() -> None:
     results = store.query("What drove revenue growth?", top_k=3)
 
     assert embedder.embedded_texts == ["What drove revenue growth?"]
-    fake_index.query.assert_called_once_with(vector=[0.1, 0.2, 0.3], top_k=3, include_metadata=True)
+    fake_index.query.assert_called_once_with(
+        vector=[0.1, 0.2, 0.3], top_k=3, include_metadata=True
+    )
 
     assert len(results) == 1
     result = results[0]
@@ -100,7 +102,9 @@ _NO_CACHE = PineconeConfig(bm25_cache_dir=None)
 
 
 def test_query_hybrid_fuses_dense_and_keyword_legs() -> None:
-    dense_match = SimpleNamespace(id="chunk_dense", score=0.9, metadata=_DENSE_ONLY_METADATA)
+    dense_match = SimpleNamespace(
+        id="chunk_dense", score=0.9, metadata=_DENSE_ONLY_METADATA
+    )
     fake_index = MagicMock()
     fake_index.query.return_value = SimpleNamespace(matches=[dense_match])
     fake_index.list.return_value = iter(
@@ -135,7 +139,9 @@ def test_query_hybrid_fuses_dense_and_keyword_legs() -> None:
     assert {r.id for r in results} == {"chunk_dense", "chunk_keyword"}
     # "chunk_keyword" only surfaces through the local BM25 leg (list+fetch),
     # not the dense leg -- confirms the sparse path actually contributes.
-    fake_index.fetch.assert_called_once_with(ids=["chunk_dense", "chunk_keyword", "chunk_filler"])
+    fake_index.fetch.assert_called_once_with(
+        ids=["chunk_dense", "chunk_keyword", "chunk_filler"]
+    )
 
 
 def test_query_hybrid_caches_the_bm25_index_across_calls() -> None:
@@ -177,7 +183,9 @@ class FakeReranker:
 
 
 def test_query_hybrid_reranked_widens_the_candidate_pool_then_reranks() -> None:
-    dense_match = SimpleNamespace(id="chunk_dense", score=0.9, metadata=_DENSE_ONLY_METADATA)
+    dense_match = SimpleNamespace(
+        id="chunk_dense", score=0.9, metadata=_DENSE_ONLY_METADATA
+    )
     fake_index = MagicMock()
     fake_index.query.return_value = SimpleNamespace(matches=[dense_match])
     fake_index.list.return_value = iter(
@@ -220,7 +228,9 @@ def test_query_hybrid_reranked_widens_the_candidate_pool_then_reranks() -> None:
     assert {c.id for c in candidates} == {"chunk_dense", "chunk_keyword"}
 
 
-def test_query_hybrid_reranked_lazily_constructs_a_default_reranker(monkeypatch) -> None:
+def test_query_hybrid_reranked_lazily_constructs_a_default_reranker(
+    monkeypatch,
+) -> None:
     fake_index = MagicMock()
     fake_index.query.return_value = SimpleNamespace(matches=[])
     fake_index.list.return_value = iter([SimpleNamespace(vectors=[])])

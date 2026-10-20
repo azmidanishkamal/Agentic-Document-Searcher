@@ -16,7 +16,12 @@ _FILING = FilingMetadata(
 
 def _result(id_: str, score: float) -> RetrievalResult:
     return RetrievalResult(
-        id=id_, text=f"text for {id_}", score=score, filing=_FILING, chunk_index=0, total_chunks=1
+        id=id_,
+        text=f"text for {id_}",
+        score=score,
+        filing=_FILING,
+        chunk_index=0,
+        total_chunks=1,
     )
 
 
